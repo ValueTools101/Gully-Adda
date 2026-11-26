@@ -1,7 +1,7 @@
 import type { BaseView, LogEntry, PlayerId, PlayerInfo } from '@gully/engine';
 import { useEffect, useRef, type ReactNode } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { feedback, playSound, type SoundName } from '../lib/feedback';
+import { feedback, type HapticKind, type SoundName } from '../lib/feedback';
 import { t } from '../strings';
 import { colors, fonts, radius, retroShadow, seatColors } from '../theme';
 import { Btn, Card, H1, H2, P } from './ui';
@@ -83,7 +83,20 @@ const LOG_SOUNDS: Record<string, SoundName> = {
   'mafia.win.mafia': 'win',
 };
 
-/** Plays a sound for each new log entry (works for local and online views). */
+const LOG_HAPTICS: Record<string, HapticKind> = {
+  'ludo.captured': 'heavy',
+  'npat.stop': 'heavy',
+  'mafia.killed': 'warning',
+  'mafia.eliminated': 'warning',
+  'rmcs.escaped': 'warning',
+  'game.winner': 'success',
+  'game.over': 'success',
+  'rmcs.caught': 'success',
+  'mafia.win.village': 'success',
+  'mafia.win.mafia': 'success',
+};
+
+/** Plays a sound (and haptic) for each new log entry (works for local and online views). */
 export function useLogSounds(log: LogEntry[], version: number): void {
   const last = useRef<number | null>(null);
   const seen = useRef(0);
@@ -98,7 +111,7 @@ export function useLogSounds(log: LogEntry[], version: number): void {
     const fresh = log.slice(Math.min(seen.current, log.length));
     seen.current = log.length;
     const key = fresh.map((e) => e.key).reverse().find((k) => LOG_SOUNDS[k]);
-    if (key) playSound(LOG_SOUNDS[key] as SoundName);
+    if (key) feedback(LOG_SOUNDS[key] as SoundName, LOG_HAPTICS[key] ?? 'tap');
   }, [log, version]);
 }
 

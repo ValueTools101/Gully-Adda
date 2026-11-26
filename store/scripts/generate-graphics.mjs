@@ -21,9 +21,16 @@ mkdirSync(storeImg, { recursive: true });
 const browser = await chromium.launch();
 const page = await browser.newPage();
 
+// Embed the app's own OFL fonts so store art uses Baloo 2 / Poppins, not system fallbacks.
+import { readFileSync } from 'node:fs';
+const fontFace = (family, weight, file) =>
+  `@font-face{font-family:'${family}';font-weight:${weight};src:url(data:font/ttf;base64,${readFileSync(require.resolve(file)).toString('base64')}) format('truetype');}`;
+const FONTS = `<style>${fontFace('Baloo 2', 800, '@expo-google-fonts/baloo-2/800ExtraBold/Baloo2_800ExtraBold.ttf')}${fontFace('Poppins', 700, '@expo-google-fonts/poppins/700Bold/Poppins_700Bold.ttf')}</style>`;
+
 async function render(svg, w, h, out, transparent = false) {
   await page.setViewportSize({ width: w, height: h });
-  await page.setContent(`<html><body style="margin:0;background:${transparent ? 'transparent' : '#fff'}">${svg}</body></html>`);
+  await page.setContent(`<html><head>${FONTS}</head><body style="margin:0;background:${transparent ? 'transparent' : '#fff'}">${svg}</body></html>`);
+  await page.evaluate(() => document.fonts.ready);
   const buf = await page.screenshot({ omitBackground: transparent, clip: { x: 0, y: 0, width: w, height: h } });
   writeFileSync(out, buf);
   console.log('wrote', out.replace(root + '/', ''));

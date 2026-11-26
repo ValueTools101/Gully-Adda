@@ -307,6 +307,7 @@ export const en = {
   'settings.credits': 'Credits & licences',
   'settings.version': 'Version {v}',
   'settings.contact': 'Contact: valuetools101@gmail.com',
+  'settings.playerId': 'Player ID (for deletion requests): {id}',
 
   // House rules
   'house.title': 'House rules',

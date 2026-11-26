@@ -4,18 +4,19 @@ import { useState } from 'react';
 import { Alert, Linking, Platform } from 'react-native';
 import { Btn, Card, Field, H2, Header, P, Screen, Toggle } from '../src/components/ui';
 import { useSettings } from '../src/lib/settings';
-import { deleteMyOnlineData, onlineConfigured } from '../src/online/firebase';
+import { deleteMyOnlineData, firebase, onlineConfigured } from '../src/online/firebase';
 import { t } from '../src/strings';
 import { colors } from '../src/theme';
 
-const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL ?? 'https://valuetools101.github.io/gully-adda/privacy.html';
-const DELETE_URL = process.env.EXPO_PUBLIC_DELETE_URL ?? 'https://valuetools101.github.io/gully-adda/delete-account.html';
+const PRIVACY_URL = process.env.EXPO_PUBLIC_PRIVACY_URL ?? 'https://valuetools101.github.io/Gully-Adda/privacy.html';
+const DELETE_URL = process.env.EXPO_PUBLIC_DELETE_URL ?? 'https://valuetools101.github.io/Gully-Adda/delete-account.html';
 
 export default function SettingsScreen() {
   const router = useRouter();
   const { settings, update } = useSettings();
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
+  const playerId = onlineConfigured ? (firebase().auth.currentUser?.uid ?? null) : null;
 
   const doDelete = async () => {
     setBusy(true);
@@ -63,6 +64,7 @@ export default function SettingsScreen() {
       </Card>
       <P center style={{ color: colors.inkSoft }}>{t('settings.version', { v: Constants.expoConfig?.version ?? '1.0.0' })}</P>
       <P center style={{ color: colors.inkSoft }}>{t('settings.contact')}</P>
+      {playerId ? <P center style={{ color: colors.inkSoft, fontSize: 12 }}>{t('settings.playerId', { id: playerId })}</P> : null}
     </Screen>
   );
 }

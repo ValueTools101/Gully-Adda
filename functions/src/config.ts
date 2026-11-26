@@ -11,3 +11,5 @@ export const ROOM_TTL_MS = 24 * 60 * 60 * 1000;
 export const MAX_AUTO_STEPS = 400;
 export const CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export const CODE_LENGTH = 6;
+/** Moderation reports are deleted after this long. */
+export const REPORT_TTL_MS = 365 * 24 * 60 * 60 * 1000;

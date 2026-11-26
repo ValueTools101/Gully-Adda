@@ -77,12 +77,12 @@ export default function Setup() {
       {mode !== 'online' ? (
         <Card>
           {min !== max ? (
-            <Stepper label={`👥 ${t('setup.players')}`} value={total} min={min} max={max} onChange={(v) => { setTotal(v); setHumans((h) => Math.min(h, v)); }} />
+            <Stepper testID="players" label={`👥 ${t('setup.players')}`} value={total} min={min} max={max} onChange={(v) => { setTotal(v); setHumans((h) => Math.min(h, v)); }} />
           ) : (
             <P>👥 {t('home.playersExact', { n: min })}</P>
           )}
           {def.meta.recommendedMin && total < def.meta.recommendedMin ? <P style={{ color: colors.danger }}>{t('setup.recommended', { n: def.meta.recommendedMin })}</P> : null}
-          {mode === 'pass' ? <Stepper label={`🙋 ${t('setup.humans')}`} value={humanCount} min={1} max={total} onChange={setHumans} /> : null}
+          {mode === 'pass' ? <Stepper testID="humans" label={`🙋 ${t('setup.humans')}`} value={humanCount} min={1} max={total} onChange={setHumans} /> : null}
           <P>🤖 {t('setup.bots.count')}: {botCount}</P>
           {botCount > 0 ? (
             <View style={{ gap: 6 }}>

@@ -36,7 +36,7 @@ function PeopleGrid({ view }: { view: MafiaView }) {
             <Text style={st.personEmoji}>{alive ? (role && p.id !== view.me ? ROLE_EMOJI[role] : '🙂') : '👻'}</Text>
             <Text style={st.personName} numberOfLines={1}>
               {p.name}
-              {p.id === view.me ? ` (${t('common.you')})` : ''}
+              {p.id === view.me && p.name !== t('setup.you') ? ` (${t('common.you')})` : ''}
             </Text>
             {!alive && role ? <Text style={st.personRole}>{t(`mafia.${role}`)}</Text> : null}
             {view.voted.includes(p.id) ? <Text style={st.personRole}>🗳 {t('mafia.voted')}</Text> : null}

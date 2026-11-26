@@ -137,14 +137,14 @@ export function Segment<T extends string | number>({ options, value, onChange }:
   );
 }
 
-export function Stepper({ label, value, min, max, step = 1, onChange }: { label: string; value: number; min: number; max: number; step?: number; onChange: (v: number) => void }) {
+export function Stepper({ label, value, min, max, step = 1, onChange, testID }: { label: string; value: number; min: number; max: number; step?: number; onChange: (v: number) => void; testID?: string }) {
   return (
     <View style={styles.settingRow}>
       <Text style={styles.settingLabel}>{label}</Text>
       <View style={styles.row}>
-        <RoundBtn label="−" disabled={value <= min} onPress={() => onChange(Math.max(min, value - step))} />
+        <RoundBtn label="−" disabled={value <= min} onPress={() => onChange(Math.max(min, value - step))} testID={testID ? `${testID}-minus` : undefined} />
         <Text style={styles.stepVal}>{value}</Text>
-        <RoundBtn label="+" disabled={value >= max} onPress={() => onChange(Math.min(max, value + step))} />
+        <RoundBtn label="+" disabled={value >= max} onPress={() => onChange(Math.min(max, value + step))} testID={testID ? `${testID}-plus` : undefined} />
       </View>
     </View>
   );
@@ -166,9 +166,10 @@ export function Toggle({ label, value, onChange }: { label: string; value: boole
   );
 }
 
-export function RoundBtn({ label, onPress, disabled }: { label: string; onPress: () => void; disabled?: boolean }) {
+export function RoundBtn({ label, onPress, disabled, testID }: { label: string; onPress: () => void; disabled?: boolean; testID?: string }) {
   return (
     <Pressable
+      testID={testID}
       accessibilityRole="button"
       accessibilityLabel={label}
       disabled={disabled}

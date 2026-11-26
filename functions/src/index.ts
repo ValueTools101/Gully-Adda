@@ -17,7 +17,7 @@ import { FieldValue, Timestamp, getFirestore, type DocumentReference, type Trans
 import { logger, setGlobalOptions } from 'firebase-functions/v2';
 import { HttpsError, onCall, type CallableRequest } from 'firebase-functions/v2/https';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
-import { CHAT_LIMIT, CODE_ALPHABET, CODE_LENGTH, REGION, ROOM_TTL_MS } from './config';
+import { CHAT_LIMIT, CODE_ALPHABET, CODE_LENGTH, REGION, REPORT_TTL_MS, ROOM_TTL_MS } from './config';
 import {
   GameError, applySettings, chatPolicy, chatReaders, checkRate, heartbeat, joinRoom, kickPlayer, leaveRoom, makeCode,
   newRoom, processGame, startGame, submitAction, viewsFor, type PrivateDoc, type Room,
@@ -285,6 +285,9 @@ export const sweepRooms = onSchedule({ schedule: 'every 1 minutes', secrets: SEC
   await Promise.all(due.docs.map((d) => tickRoom(d.id, null).catch((e) => logger.warn('tick failed', d.id, String(e)))));
   const old = await db.collection('rooms').where('updatedAt', '<', now - ROOM_TTL_MS).limit(50).get();
   await Promise.all(old.docs.map((d) => db.recursiveDelete(d.ref)));
+  // Reports are kept at most 12 months (see privacy policy).
+  const stale = await db.collection('reports').where('at', '<', Timestamp.fromMillis(now - REPORT_TTL_MS)).limit(200).get();
+  await deleteRefs(stale.docs.map((d) => d.ref));
 });
 
 export const sendChat = onCall(CALL_OPTS, (req) =>
@@ -389,6 +392,9 @@ export const deleteMyData = onCall(CALL_OPTS, (req) =>
     await deleteRefs(msgs.docs.map((d) => d.ref));
     const reports = await db.collection('reports').where('reporter', '==', uid).get();
     await deleteRefs(reports.docs.map((d) => d.ref));
+    // Reports about this player stay for safety review, but without their display name.
+    const about = await db.collection('reports').where('target', '==', uid).get();
+    await Promise.all(about.docs.map((d) => d.ref.update({ targetName: '(deleted)' })));
     await db.collection('users').doc(uid).delete();
     await getAuth().deleteUser(uid).catch(() => {});
     return { ok: true };
