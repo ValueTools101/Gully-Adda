@@ -40,7 +40,7 @@ const config = (): ExpoConfig => ({
     favicon: './assets/images/favicon.png',
   },
   plugins: [
-    'expo-router',
+    process.env.SINGLE_BUNDLE === 'true' ? ['expo-router', { asyncRoutes: false }] : 'expo-router',
     'expo-font',
     ['expo-audio', { microphonePermission: 'Gully Adda uses the microphone only for optional voice chat in online Mafia rooms.' }],
     [

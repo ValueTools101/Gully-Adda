@@ -27,3 +27,4 @@ functions/.secret.local
 functions/.env.*
 !functions/.env.example
 dist-web-emu/
+dist-artifact/

@@ -20,7 +20,8 @@
     "store:screenshots": "cd apps/mobile && npx expo export --platform web --output-dir dist-web && cd ../.. && node store/scripts/screenshots.mjs",
     "sounds": "node apps/mobile/scripts/generate-sounds.mjs",
     "store:pages": "node store/scripts/build-pages.mjs",
-    "store:check-urls": "node store/scripts/check-urls.mjs"
+    "store:check-urls": "node store/scripts/check-urls.mjs",
+    "preview:html": "cd apps/mobile && SINGLE_BUNDLE=true npx expo export --platform web --output-dir dist-artifact && node scripts/pack-single-html.mjs dist-artifact dist-artifact/gully-adda.html"
   },
   "engines": {
     "node": ">=20"
