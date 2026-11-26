@@ -57,8 +57,9 @@ describe('server edge cases', () => {
   });
 
   it('everyone leaving mid-game: bots finish, last human leaving deletes the room', () => {
-    let { room, priv } = startGame(lobby('dots', 3), 'u0', 4, T);
-    room = leaveRoom(room, 'u0')!;
+    const started = startGame(lobby('dots', 3), 'u0', 4, T);
+    const priv = started.priv;
+    let room = leaveRoom(started.room, 'u0')!;
     expect(room.hostUid).not.toBe('u0');
     room = leaveRoom(room, 'u1')!;
     const p = processGame(room, priv, T + 1000);
