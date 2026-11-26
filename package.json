@@ -11,13 +11,20 @@
   "scripts": {
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
-    "test": "npm run test -w @gully/engine",
+    "test": "npm run test -w @gully/engine && npm run test -w functions",
     "test:sim": "npm run test:sim -w @gully/engine",
-    "test:emulator": "firebase emulators:exec --only firestore,functions,auth --project demo-gully-adda \"npm run test:emulator -w functions\"",
-    "check": "npm run typecheck && npm run lint && npm test"
+    "test:emulator": "npm run build -w functions && (cp -n functions/.secret.local.example functions/.secret.local || true) && firebase emulators:exec --only auth,firestore,functions --project demo-gully-adda \"npm run test:emulator -w functions\"",
+    "check": "npm run typecheck && npm run lint && npm test",
+    "emulators": "npm run build -w functions && (cp -n functions/.secret.local.example functions/.secret.local || true) && firebase emulators:start --only auth,firestore,functions --project demo-gully-adda"
   },
   "engines": {
     "node": ">=20"
   },
-  "packageManager": "npm@11.21.3"
+  "packageManager": "npm@11.21.3",
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "@firebase/util@1.15.3": true,
+    "protobufjs@7.6.6": true,
+    "re2": false
+  }
 }

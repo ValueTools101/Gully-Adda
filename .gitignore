@@ -23,3 +23,7 @@ apps/mobile/ios/
 *.tsbuildinfo
 store/.tmp/
 dist-web/
+functions/.secret.local
+functions/.env.*
+!functions/.env.example
+dist-web-emu/

@@ -147,6 +147,7 @@ export const en = {
   'log.ludo.captured': '{name} cut {victim}!',
   'log.ludo.tokenHome': '{name} brought a token home',
   'log.ludo.finished': '{name} finished #{n}',
+  'log.online.botTookOver': '{name} dropped out. A bot is playing for them until they come back',
 
   // RMCS UI
   'rmcs.raja': 'Raja',
