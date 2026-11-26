@@ -1,7 +1,8 @@
 import { SKIP, type MafiaRole, type MafiaView, type PlayerId } from '@gully/engine';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { SkyBanner } from '../art/Decor';
 import { GameOverPanel, LogFeed, playerName } from '../components/game';
-import { Btn, Card, Countdown, H2, P, Row } from '../components/ui';
+import { Btn, Card, Countdown, H2, P } from '../components/ui';
 import { t } from '../strings';
 import { colors, fonts, radius, retroShadow } from '../theme';
 import { useGameNav } from './nav';
@@ -49,6 +50,7 @@ function PeopleGrid({ view }: { view: MafiaView }) {
 
 export function MafiaBoard({ view, act, actGroup, shared }: BoardProps<MafiaView>) {
   const nav = useGameNav();
+  const { width } = useWindowDimensions();
   const legal = view.legal as { type: string; target?: string }[];
   const night = view.phase === 'night' || view.phase === 'roles';
   const team = Object.entries(view.knownRoles).filter(([, r]) => r === 'mafia').map(([id]) => id);
@@ -82,10 +84,13 @@ export function MafiaBoard({ view, act, actGroup, shared }: BoardProps<MafiaView
 
   return (
     <View style={{ gap: 12 }}>
-      <Row style={{ justifyContent: 'space-between' }}>
-        <H2 style={{ color: colors.cream }}>{title}</H2>
-        <Countdown deadline={view.deadline} dark />
-      </Row>
+      <View>
+        <SkyBanner night={night} width={Math.min(width - 32, 608)} />
+        <View style={st.skyTitle}>
+          <H2 style={{ color: night ? colors.cream : colors.ink }}>{title}</H2>
+          <Countdown deadline={view.deadline} dark />
+        </View>
+      </View>
 
       {showPrivate && !view.amAlive ? (
         <Card dark>
@@ -206,6 +211,7 @@ export function MafiaBoard({ view, act, actGroup, shared }: BoardProps<MafiaView
 }
 
 const st = StyleSheet.create({
+  skyTitle: { position: 'absolute', left: 14, top: 8, gap: 2 },
   role: { borderRadius: radius.lg, borderWidth: 3, borderColor: colors.cream, padding: 18, alignItems: 'center', gap: 6, ...retroShadow },
   roleEmoji: { fontSize: 64 },
   roleTitle: { fontFamily: fonts.display, fontSize: 36, color: colors.white },

@@ -57,7 +57,10 @@ function AnswerForm({ view, act, mode }: Pick<BoardProps<NpatView>, 'view' | 'ac
   const canStop = filled && !view.stoppedBy && (view.legal as { type: string }[]).some((a) => a.type === 'answer');
 
   return (
-    <Card>
+    <Card style={st.notebook}>
+      <View style={st.margin} pointerEvents="none" />
+      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map((i) => <View key={i} style={[st.rule, { top: 60 + i * 34 }]} pointerEvents="none" />)}
+      <View style={st.holes} pointerEvents="none">{[0, 1, 2].map((i) => <View key={i} style={st.hole} />)}</View>
       <Row style={{ justifyContent: 'space-between' }}>
         <View style={st.letterBox}>
           <Text style={st.letterLabel}>{t('npat.letter')}</Text>
@@ -197,12 +200,17 @@ export function NpatBoard({ view, act, actGroup, mode, shared }: BoardProps<Npat
 }
 
 const st = StyleSheet.create({
+  notebook: { backgroundColor: '#FFFEF8', paddingLeft: 34, overflow: 'hidden' },
+  margin: { position: 'absolute', left: 26, top: 0, bottom: 0, width: 2, backgroundColor: '#EF9A9A' },
+  rule: { position: 'absolute', left: 0, right: 0, height: 1, backgroundColor: '#BBDEFB' },
+  holes: { position: 'absolute', left: 6, top: 40, gap: 90 },
+  hole: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.cream, borderWidth: 1.5, borderColor: '#D7CCC8' },
   letterBox: { alignItems: 'center', backgroundColor: colors.mustard, borderWidth: 3, borderColor: colors.ink, borderRadius: radius.md, paddingHorizontal: 16, ...retroShadow },
   letterLabel: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.ink, marginTop: 4 },
   letter: { fontFamily: fonts.display, fontSize: 52, lineHeight: 60, color: colors.maroon },
   letterBig: { fontFamily: fonts.display, fontSize: 96, lineHeight: 110, color: colors.maroon },
-  catLabel: { fontFamily: fonts.heading, fontSize: 18, color: colors.teal },
-  input: { borderWidth: 2, borderColor: colors.ink, borderRadius: radius.sm, backgroundColor: colors.white, paddingHorizontal: 12, minHeight: 50, fontFamily: fonts.bodyBold, fontSize: 18, color: colors.ink },
+  catLabel: { fontFamily: fonts.heading, fontSize: 18, color: colors.maroon },
+  input: { borderWidth: 0, borderBottomWidth: 2, borderColor: colors.sky, borderRadius: 0, backgroundColor: 'transparent', paddingHorizontal: 12, minHeight: 50, fontFamily: fonts.bodyBold, fontSize: 18, color: colors.ink },
   catBlock: { borderTopWidth: 2, borderColor: colors.cream, paddingTop: 6, gap: 2 },
   answerRow: { flexDirection: 'row', alignItems: 'center', gap: 8, minHeight: 44 },
   answerName: { width: 80, fontFamily: fonts.body, fontSize: 13, color: colors.inkSoft },

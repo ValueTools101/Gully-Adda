@@ -3,6 +3,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { Btn, Card, Field, H2, Header, P, Screen, Segment, Stepper } from '../../src/components/ui';
+import { GameArt } from '../../src/art/GameArt';
 import { GAME_UI } from '../../src/games';
 import { ConfigEditor, localConfig } from '../../src/games/ConfigEditor';
 import { BOT_NAMES } from '../../src/local/botNames';
@@ -55,6 +56,9 @@ export default function Setup() {
     <Screen>
       <Header title={t(`game.${id}.title`)} />
       <Card style={{ backgroundColor: GAME_UI[id].color }}>
+        <View style={{ alignItems: 'center' }}>
+          <GameArt game={id} size={110} />
+        </View>
         <P style={{ color: id === 'mafia' ? colors.cream : colors.ink, fontSize: 16 }}>
           {GAME_UI[id].emoji} {t(`game.${id}.short`)}
         </P>

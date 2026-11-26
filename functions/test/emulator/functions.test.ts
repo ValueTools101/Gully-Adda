@@ -174,3 +174,44 @@ describe('chat in a lobby', () => {
     expect(limited).toBe(true);
   });
 });
+
+describe('edge cases over the wire', () => {
+  it('rejects malformed codes, missing auth data and oversize input', async () => {
+    const c = await client();
+    clients.push(c);
+    for (const bad of ['', 'ABC', 'ABCDEFG', 'ABC 23', 'ABC10I', 'AB/C12', 12345, null, { $gt: '' }]) {
+      expect(await errCode(c.call('joinRoom', { code: bad, name: 'X' }))).toMatch(/bad_code|bad_name/);
+    }
+    expect(await errCode(c.call('createRoom', { name: 'x'.repeat(5000) }))).toBe('no_error');
+    expect(await errCode(c.call('createRoom', {}))).toContain('bad_name');
+    expect(await errCode(c.call('submitAction', { code: 'ABC234', action: { type: 'roll' }, seq: 1 }))).toContain('room_not_found');
+  });
+
+  it('starting twice and acting with a non-number seq fail cleanly', async () => {
+    const h = await client();
+    clients.push(h);
+    const { code } = await h.call<{ code: string }>('createRoom', { name: 'H', game: 'dots' });
+    expect(await errCode(h.call('startGame', { code }))).toContain('wrong_player_count');
+    await h.call('setSettings', { code, botCount: 1 });
+    await h.call('startGame', { code });
+    expect(await errCode(h.call('startGame', { code }))).toContain('game_in_progress');
+    expect(await errCode(h.call('submitAction', { code, action: { type: 'line', line: 0 }, seq: 'x' }))).toContain('stale_or_duplicate');
+    expect(await errCode(h.call('getVoiceToken', { code }))).toMatch(/voice_disabled|no_voice/);
+  });
+
+  it('the last human leaving deletes the room and its private state', async () => {
+    const h = await client();
+    clients.push(h);
+    const { code } = await h.call<{ code: string }>('createRoom', { name: 'H', game: 'ludo' });
+    await h.call('setSettings', { code, botCount: 1 });
+    await h.call('startGame', { code });
+    await h.call('leaveRoom', { code });
+    expect(await errCode(h.call('heartbeat', { code }))).toContain('room_not_found');
+  });
+
+  it('delete my data works for a user who never joined a room', async () => {
+    const c = await client();
+    clients.push(c);
+    expect(await errCode(c.call('deleteMyData', {}))).toBe('no_error');
+  });
+});

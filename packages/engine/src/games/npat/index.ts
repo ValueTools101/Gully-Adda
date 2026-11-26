@@ -15,6 +15,8 @@ export const NPAT_EXTRA_CATEGORIES = ['food', 'movie', 'colour', 'brand', 'city'
 const LETTERS = 'ABCDEFGHIJKLMNOPRSTUVWY'.split(''); // skip Q, X, Z (too hard)
 export const NPAT_POINTS = { unique: 10, duplicate: 5, invalid: 0 } as const;
 export const NPAT_MAX_ANSWER = 40;
+/** Control, zero-width and bidi-override characters (could spoof answers on other screens). */
+const INVISIBLE = new RegExp('[\\u0000-\\u001f\\u007f-\\u009f\\u200b-\\u200f\\u2028-\\u202e\\u2066-\\u2069\\ufeff]', 'g');
 
 export interface NpatConfig {
   categories: string[];
@@ -206,7 +208,7 @@ function cleanAnswers(cats: string[], raw: Record<string, string>): Record<strin
   const out: Record<string, string> = {};
   for (const c of cats) {
     const v = raw[c];
-    out[c] = typeof v === 'string' ? v.slice(0, NPAT_MAX_ANSWER).replace(/[\u0000-\u001f]/g, '') : '';
+    out[c] = typeof v === 'string' ? v.replace(INVISIBLE, '').slice(0, NPAT_MAX_ANSWER) : '';
   }
   return out;
 }

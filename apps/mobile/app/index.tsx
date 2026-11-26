@@ -1,6 +1,8 @@
 import { GAME_ORDER, getGame } from '@gully/engine';
 import { useRouter } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { GameArt } from '../src/art/GameArt';
+import { Bunting, PopIn } from '../src/art/Decor';
 import { Btn, P, Row, Screen } from '../src/components/ui';
 import { GAME_UI } from '../src/games';
 import { feedback } from '../src/lib/feedback';
@@ -9,8 +11,12 @@ import { colors, fonts, radius, retroShadow } from '../src/theme';
 
 export default function Home() {
   const router = useRouter();
+  const { width } = useWindowDimensions();
   return (
     <Screen testID="home">
+      <View style={{ marginHorizontal: -16, marginTop: -16, alignItems: 'center' }}>
+        <Bunting width={Math.min(width, 640)} />
+      </View>
       <View style={st.hero}>
         <Text style={st.kicker}>★ {t('tagline')} ★</Text>
         <Text style={st.logo} accessibilityRole="header">
@@ -28,8 +34,8 @@ export default function Home() {
         const ui = GAME_UI[id];
         const meta = getGame(id)!.meta;
         return (
+          <PopIn key={id} delay={i * 60}>
           <Pressable
-            key={id}
             testID={`game-${id}`}
             accessibilityRole="button"
             accessibilityLabel={t(`game.${id}.title`)}
@@ -39,7 +45,9 @@ export default function Home() {
             }}
             style={({ pressed }) => [st.tile, { backgroundColor: ui.color, transform: [{ rotate: i % 2 ? '0.6deg' : '-0.6deg' }] }, pressed ? { opacity: 0.85 } : retroShadow]}
           >
-            <Text style={st.tileEmoji}>{ui.emoji}</Text>
+            <View style={st.art}>
+              <GameArt game={id} size={64} />
+            </View>
             <View style={{ flex: 1 }}>
               <Text style={[st.tileTitle, id === 'mafia' && { color: colors.cream }]}>{t(`game.${id}.title`)}</Text>
               <Text style={[st.tileSub, id === 'mafia' && { color: colors.cream }]}>{t(`game.${id}.short`)}</Text>
@@ -48,6 +56,7 @@ export default function Home() {
               </Text>
             </View>
           </Pressable>
+          </PopIn>
         );
       })}
 
@@ -68,7 +77,7 @@ const st = StyleSheet.create({
   ribbonText: { fontSize: 22 },
   section: { fontFamily: fonts.heading, fontSize: 24, color: colors.ink, marginTop: 8 },
   tile: { flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: radius.lg, borderWidth: 3, borderColor: colors.ink, padding: 14, minHeight: 96 },
-  tileEmoji: { fontSize: 44 },
+  art: { backgroundColor: 'rgba(255,255,255,0.55)', borderRadius: 14, borderWidth: 2, borderColor: colors.ink, padding: 2 },
   tileTitle: { fontFamily: fonts.heading, fontSize: 22, lineHeight: 26, color: colors.ink },
   tileSub: { fontFamily: fonts.body, fontSize: 13, color: colors.ink },
   tilePlayers: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.maroon, marginTop: 2 },

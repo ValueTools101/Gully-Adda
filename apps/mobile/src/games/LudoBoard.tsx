@@ -1,7 +1,7 @@
 import { LUDO_HOME, LUDO_LAST_MAIN, LUDO_SAFE, absSquare, type LudoView } from '@gully/engine';
 import type { ReactNode } from 'react';
 import { useWindowDimensions, View } from 'react-native';
-import Svg, { Circle, G, Polygon, Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, Ellipse, G, Path, Polygon, Rect, Text as SvgText } from 'react-native-svg';
 import { GameOverPanel, LogFeed, PlayerStrip, TurnBanner, playerName } from '../components/game';
 import { Btn, Countdown, P, Row } from '../components/ui';
 import { feedback } from '../lib/feedback';
@@ -13,6 +13,7 @@ import type { BoardProps } from './types';
 
 export const LUDO_COLORS = ['#E53935', '#43A047', '#FBC02D', '#1E88E5'];
 const LIGHT = ['#FFCDD2', '#C8E6C9', '#FFF59D', '#BBDEFB'];
+const LUDO_DARK = ['#B71C1C', '#1B5E20', '#F57F17', '#0D47A1'];
 
 /** Absolute track square -> [row, col] on the 15x15 grid (clockwise from red's start). */
 const TRACK: [number, number][] = [
@@ -130,9 +131,12 @@ export function LudoBoard({ view, act }: BoardProps<LudoView>) {
             return (
               <G key={`k${tk.pid}-${tk.idx}`}>
                 {canMove ? <Circle cx={cx} cy={cy} r={u * 0.62} fill={colors.white} stroke={colors.mustard} strokeWidth={4} /> : null}
-                <Circle cx={cx + 1.5} cy={cy + 2} r={u * 0.38} fill={colors.ink} />
-                <Circle cx={cx} cy={cy} r={u * 0.38} fill={LUDO_COLORS[tk.colour]} stroke={colors.ink} strokeWidth={2} />
-                <Circle cx={cx - u * 0.1} cy={cy - u * 0.1} r={u * 0.1} fill={colors.white} opacity={0.7} />
+                {/* 3D pawn: shadow, base, body, head, highlight */}
+                <Ellipse cx={cx + 1.5} cy={cy + u * 0.3} rx={u * 0.38} ry={u * 0.15} fill={colors.ink} opacity={0.35} />
+                <Ellipse cx={cx} cy={cy + u * 0.22} rx={u * 0.36} ry={u * 0.15} fill={LUDO_DARK[tk.colour]} stroke={colors.ink} strokeWidth={1.2} />
+                <Path d={`M${cx - u * 0.3} ${cy + u * 0.2} Q${cx - u * 0.12} ${cy - u * 0.05} ${cx - u * 0.12} ${cy - u * 0.3} L${cx + u * 0.12} ${cy - u * 0.3} Q${cx + u * 0.12} ${cy - u * 0.05} ${cx + u * 0.3} ${cy + u * 0.2} Z`} fill={LUDO_COLORS[tk.colour]} stroke={colors.ink} strokeWidth={1.2} />
+                <Circle cx={cx} cy={cy - u * 0.38} r={u * 0.2} fill={LUDO_COLORS[tk.colour]} stroke={colors.ink} strokeWidth={1.2} />
+                <Circle cx={cx - u * 0.07} cy={cy - u * 0.45} r={u * 0.06} fill={colors.white} opacity={0.85} />
                 {canMove ? (
                   <Circle
                     testID={`token-${tk.idx}`}

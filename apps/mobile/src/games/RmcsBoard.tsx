@@ -1,5 +1,6 @@
 import type { RmcsRole, RmcsView } from '@gully/engine';
-import { StyleSheet, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 import { GameOverPanel, LogFeed, PlayerStrip, TurnBanner, playerName } from '../components/game';
 import { Btn, Card, Countdown, H2, P } from '../components/ui';
 import { t } from '../strings';
@@ -11,11 +12,22 @@ const ROLE_EMOJI: Record<RmcsRole, string> = { raja: '👑', mantri: '📜', cho
 const ROLE_COLOR: Record<RmcsRole, string> = { raja: colors.mustard, mantri: colors.teal, chor: colors.inkSoft, sipahi: colors.sky };
 
 export function Chit({ role, big }: { role: RmcsRole; big?: boolean }) {
+  // Big chits unfold like a paper slip being opened.
+  const [flip] = useState(() => new Animated.Value(big ? 0 : 1));
+  useEffect(() => {
+    if (big) Animated.timing(flip, { toValue: 1, duration: 650, easing: Easing.out(Easing.back(1.4)), useNativeDriver: true }).start();
+  }, [big, flip]);
+  const rotateY = flip.interpolate({ inputRange: [0, 1], outputRange: ['90deg', '0deg'] });
   return (
-    <View style={[st.chit, big && st.chitBig, { backgroundColor: ROLE_COLOR[role] }]} accessibilityLabel={t(`rmcs.${role}`)}>
+    <Animated.View
+      style={[st.chit, big && st.chitBig, { backgroundColor: ROLE_COLOR[role], transform: [{ perspective: 800 }, { rotateY }, { rotate: '-2deg' }] }]}
+      accessibilityLabel={t(`rmcs.${role}`)}
+    >
+      <View style={st.fold} />
       <Text style={[st.chitEmoji, big && { fontSize: 72 }]}>{ROLE_EMOJI[role]}</Text>
       <Text style={[st.chitText, big && { fontSize: 30 }]}>{t(`rmcs.${role}`)}</Text>
-    </View>
+      {big ? <Text style={st.chitPts}>{role === 'raja' ? '1000' : role === 'mantri' ? '800' : role === 'sipahi' ? '500' : '0 / 800'}</Text> : null}
+    </Animated.View>
   );
 }
 
@@ -106,9 +118,11 @@ export function RmcsBoard({ view, act, actGroup, shared }: BoardProps<RmcsView>)
 
 const st = StyleSheet.create({
   top: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  chit: { width: 76, height: 92, borderRadius: radius.sm, borderWidth: 2.5, borderColor: colors.ink, alignItems: 'center', justifyContent: 'center', ...retroShadow, transform: [{ rotate: '-2deg' }] },
+  chit: { width: 76, height: 92, borderRadius: radius.sm, borderWidth: 2.5, borderColor: colors.ink, alignItems: 'center', justifyContent: 'center', ...retroShadow },
   chitBig: { width: 200, height: 230, borderWidth: 4, marginVertical: 8 },
   chitEmoji: { fontSize: 32 },
+  fold: { position: 'absolute', top: '50%', left: 6, right: 6, borderTopWidth: 1, borderColor: 'rgba(0,0,0,0.18)', borderStyle: 'dashed' },
+  chitPts: { fontFamily: fonts.bodyBold, fontSize: 14, color: colors.ink, opacity: 0.7, marginTop: 4 },
   chitText: { fontFamily: fonts.heading, fontSize: 15, color: colors.ink },
   knownRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 14, justifyContent: 'center', marginTop: 4 },
   knownName: { fontFamily: fonts.bodyBold, fontSize: 13, marginTop: 6, color: colors.ink },

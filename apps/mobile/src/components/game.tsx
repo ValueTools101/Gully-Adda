@@ -1,6 +1,8 @@
 import type { BaseView, LogEntry, PlayerId, PlayerInfo } from '@gully/engine';
-import { useEffect, useRef, type ReactNode } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Confetti, PopIn } from '../art/Decor';
+import { PhoneArt } from '../art/PhoneArt';
 import { feedback, type HapticKind, type SoundName } from '../lib/feedback';
 import { t } from '../strings';
 import { colors, fonts, radius, retroShadow, seatColors } from '../theme';
@@ -143,7 +145,7 @@ export function PassGate({ name, onReveal, dark }: { name: string; onReveal: () 
       }}
       style={[s.gate, dark && { backgroundColor: colors.night }]}
     >
-      <Text style={s.gateEmoji}>📱🤫</Text>
+      <PhoneArt />
       <P center style={{ color: colors.cream, fontSize: 18 }}>{t('pass.to')}</P>
       <H1 style={{ color: colors.mustard, textAlign: 'center', fontSize: 44 }}>{name}</H1>
       <View style={s.gateBtn}>
@@ -160,6 +162,8 @@ export function GameOverPanel({
   const best = scores[ranked[0]?.id ?? ''] ?? 0;
   const winners = ranked.filter((p) => (scores[p.id] ?? 0) === best).map((p) => p.name);
   return (
+    <PopIn>
+    <View>
     <Card style={{ alignItems: 'stretch' }} dark={dark}>
       <Text style={s.trophy}>🏆</Text>
       <H1 style={{ textAlign: 'center', color: dark ? colors.mustard : colors.maroon }}>
@@ -178,18 +182,31 @@ export function GameOverPanel({
         <Btn label={t('common.home')} kind="ghost" onPress={onHome} />
       </View>
     </Card>
+    <Confetti />
+    </View>
+    </PopIn>
   );
 }
 
 /** Small banner showing whose turn it is / who we're waiting for. */
 export function TurnBanner({ view, dark }: { view: BaseView; dark?: boolean }) {
+  const mine = !!view.me && view.waitingFor.includes(view.me) && !view.over;
+  const [pulse] = useState(() => new Animated.Value(1));
+  useEffect(() => {
+    if (!mine) return;
+    const loop = Animated.loop(Animated.sequence([
+      Animated.timing(pulse, { toValue: 1.04, duration: 500, useNativeDriver: true }),
+      Animated.timing(pulse, { toValue: 1, duration: 500, useNativeDriver: true }),
+    ]));
+    loop.start();
+    return () => loop.stop();
+  }, [mine, pulse]);
   if (view.over) return null;
-  const mine = view.me && view.waitingFor.includes(view.me);
   const names = view.waitingFor.map((id) => playerName(view, id)).join(', ');
   return (
-    <View style={[s.banner, mine && { backgroundColor: colors.leaf }, dark && !mine && { backgroundColor: colors.nightSoft }]}>
+    <Animated.View style={[{ transform: [{ scale: pulse }] }, s.banner, mine && { backgroundColor: colors.leaf }, dark && !mine && { backgroundColor: colors.nightSoft }]}>
       <Text style={s.bannerText}>{mine ? t('common.yourTurn') : names ? t('common.waitingFor', { names }) : '…'}</Text>
-    </View>
+    </Animated.View>
   );
 }
 
