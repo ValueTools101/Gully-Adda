@@ -80,6 +80,21 @@ describe('online games', () => {
     }
   });
 
+  it('hide & seek: nobody sees where others hid, and the seeker sees no one', () => {
+    let { room, priv } = startGame(lobby('hideseek', 4), 'u0', 11, T);
+    let st = JSON.parse(priv.json);
+    const seeker = st.players[st.seekerIndex % 4].id as string;
+    for (const id of ['u0', 'u1', 'u2', 'u3'].filter((x) => x !== seeker)) {
+      ({ room, priv } = submitAction(room, priv, id, { type: 'hide', spot: 'well' }, 1, T));
+    }
+    st = JSON.parse(priv.json);
+    expect(st.phase).toBe('seek');
+    const views = viewsFor(room, st);
+    expect(JSON.parse(views[seeker]!).mySpot).toBeNull();
+    expect(JSON.parse(views[seeker]!).knownSpots).toEqual({});
+    for (const [uid, json] of Object.entries(views)) if (uid !== seeker) expect(JSON.parse(json).knownSpots).toEqual({});
+  });
+
   it('rejects out-of-turn, malformed, duplicate and replayed actions', () => {
     const { room, priv } = startGame(lobby('ludo', 2), 'u0', 5, T);
     expectCode(() => submitAction(structuredClone(room), structuredClone(priv), 'u1', { type: 'roll' }, 1, T), 'not_your_turn');

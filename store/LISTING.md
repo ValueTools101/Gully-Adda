@@ -8,11 +8,12 @@ Play 90s retro adda games with bots, friends on one phone, or online.
 
 ## Full description (4000 max)
 <!-- full-description:start -->
-Remember the summer holidays? Chits folded in a tiffin box, a Ludo board on the floor, a notebook full of Name Place Animal Thing, and that one cousin who was always the Mafia. Gully Adda brings the classic Indian 90s and 2000s adda games to your phone.
+Remember the summer holidays? Chits folded in a tiffin box, a Ludo board on the floor, "Dhappa!" echoing through the gully, a notebook full of Name Place Animal Thing, and that one cousin who was always the Mafia. Gully Adda brings the classic Indian 90s and 2000s adda games to your phone.
 
-PLAY 5 DESI CLASSICS
+PLAY 6 DESI CLASSICS
 • Raja Mantri Chor Sipahi: everyone peeks at their chit, the Raja calls "Mantri, find the Chor!" and the Mantri has one guess. Raja 1000, Mantri 800, Sipahi 500, Chor 800 if he escapes. Choose how many rounds.
 • Mafia: the village sleeps, the Mafia wake up. With Doctor, Detective and Villagers, 5 to 12 players. The app is your narrator, so nobody has to sit out.
+• Chhupan Chhupai (Hide & Seek): pick a secret hiding spot in a colourful 3D mohalla: behind the water tank, inside the auto, under the staircase. The seeker searches one spot a round; sneak closer, listen for rustles, and dash to the den shouting "Dhappa!" before you are found. 3 to 8 players.
 • Name Place Animal Thing: one random letter, four boxes, press STOP when you are done. Unique answer 10 points, same answer 5. Challenge doubtful answers and vote them out. Add categories like Food, Movie or City.
 • Dots and Boxes: join the dots, close the boxes and take an extra turn. 4x4 or 5x5 boards, 2 to 4 players.
 • Ludo: roll a 6 to come out, cut your cousins, race home. Safe stars, exact roll to finish, three 6s and you lose the turn. 2 to 4 players.
@@ -46,7 +47,7 @@ Gully Adda is an independent app and is not affiliated with any board game brand
 Games → Board (secondary tag ideas: Casual, Party, Family, Offline, Multiplayer)
 
 ## Tags / keywords to weave in (already in text)
-90s games, Indian games, desi games, adda, Raja Mantri Chor Sipahi, Mafia, Name Place Animal Thing, Ludo, Dots and Boxes, pass and play, offline games, party games, family games, multiplayer with friends.
+90s games, Indian games, desi games, adda, Raja Mantri Chor Sipahi, Mafia, hide and seek, Chhupan Chhupai, Name Place Animal Thing, Ludo, Dots and Boxes, pass and play, offline games, party games, family games, multiplayer with friends.
 
 ## Contact details
 - Email: valuetools101@gmail.com
@@ -56,5 +57,5 @@ Games → Board (secondary tag ideas: Casual, Party, Family, Offline, Multiplaye
 ## Graphics (in /store/graphics and /store/screenshots)
 - App icon 512x512: `graphics/icon-512.png`
 - Feature graphic 1024x500: `graphics/feature-graphic-1024x500.png`
-- Phone screenshots 1080x1920: `screenshots/01-home.png` … `07-dots.png`
+- Phone screenshots 1080x1920: `screenshots/01-home.png` … `08-dots.png`
 - Regenerate: `npm run store:graphics` and `npm run store:screenshots`

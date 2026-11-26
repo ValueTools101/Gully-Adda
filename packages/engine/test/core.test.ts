@@ -25,7 +25,7 @@ describe('Rng', () => {
 
 describe('registry', () => {
   it('has every v1 game with consistent ids', () => {
-    expect(GAME_ORDER).toEqual(['rmcs', 'mafia', 'npat', 'dots', 'ludo']);
+    expect(GAME_ORDER).toEqual(['rmcs', 'mafia', 'hideseek', 'npat', 'dots', 'ludo']);
     for (const id of GAME_ORDER) expect(GAMES[id].meta.id).toBe(id);
     expect(getGame('carrom')).toBeNull();
     expect(isGameId('ludo')).toBe(true);

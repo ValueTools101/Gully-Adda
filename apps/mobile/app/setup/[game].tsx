@@ -22,7 +22,7 @@ export default function Setup() {
   const { minPlayers: min, maxPlayers: max } = def.meta;
 
   const [mode, setMode] = useState<Mode>('bots');
-  const [total, setTotal] = useState(Math.max(min, Math.min(max, def.meta.recommendedMin ?? (id === 'npat' ? 4 : min))));
+  const [total, setTotal] = useState(Math.max(min, Math.min(max, def.meta.recommendedMin ?? (id === 'npat' || id === 'hideseek' ? 4 : min))));
   const [humans, setHumans] = useState(Math.min(2, total));
   const [names, setNames] = useState<string[]>([]);
   const [difficulty, setDifficulty] = useState<BotDifficulty>('medium');

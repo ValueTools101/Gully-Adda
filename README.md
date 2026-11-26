@@ -1,6 +1,6 @@
 # Gully Adda: 90s Retro Games
 
-Classic Indian 90s/2000s adda games on your phone — **Raja Mantri Chor Sipahi, Mafia, Name Place Animal Thing, Dots and Boxes, Ludo** — playable **vs bots (offline)**, **pass & play on one phone**, or **online with friends** (6-character room codes).
+Classic Indian 90s/2000s adda games on your phone — **Raja Mantri Chor Sipahi, Mafia, Chhupan Chhupai (Hide & Seek in an isometric 3D mohalla), Name Place Animal Thing, Dots and Boxes, Ludo** — playable **vs bots (offline)**, **pass & play on one phone**, or **online with friends** (6-character room codes).
 
 Expo (React Native) + TypeScript strict · Firebase (anonymous Auth, Firestore, Cloud Functions 2nd gen) · LiveKit voice (optional) · EAS builds · Android first.
 
@@ -11,7 +11,7 @@ Expo (React Native) + TypeScript strict · Firebase (anonymous Auth, Firestore, 
 ```
 packages/engine/     Pure TypeScript game rules (no React, no Firebase). Used by BOTH the app and Cloud Functions.
   src/core/          GameDefinition interface, registry, seeded RNG, bot/timeout runner, card helpers (for future card games)
-  src/games/<id>/    rmcs, mafia, npat, dots, ludo
+  src/games/<id>/    rmcs, mafia, hideseek, npat, dots, ludo
   test/              unit tests + bot-vs-bot simulations (≈17,000 games)
 apps/mobile/         Expo app (expo-router). app/ = screens, src/games = boards, src/local = offline controller,
                      src/online = Firebase client, src/voice = LiveKit, src/strings/en.ts = ALL text (add hi.ts for Hindi)
@@ -148,7 +148,7 @@ Assets and texts are in `/store`. Do steps 1–6 once.
 4. **Test and release → Testing → Internal testing** → Testers tab → create email list (your Gmail + friends) → **Create new release** → accept **Play App Signing** → upload the production `.aab` from EAS → Release name `1.0.0 (1)` → Release notes: `First internal test of Gully Adda.` → Next → **Save and publish**. Copy the opt-in link; install on your phones; run `store/MANUAL_TEST_CHECKLIST.md`.
 5. **Test and release → Testing → Closed testing** → **Create track** (e.g. `friends`) → Testers: Google Group or email list with 15–20 people → Countries: India (+ any) → **Create new release** → upload the same/newer `.aab` → Release notes: `Closed test: 5 retro games vs bots, pass & play and online.` → **Send for review**. Send testers the message in `store/TESTING_TRACKS.md`. Keep ≥12 opted in for **14 consecutive days**; ship one small update during the test.
 6. **Dashboard → Apply for production** (appears after 14 days) → answer: how you recruited testers, what feedback you got, what you changed (keep notes during the test).
-7. **Test and release → Production → Create new release** → promote the tested build → release notes `Gully Adda is here! Raja Mantri Chor Sipahi, Mafia, Name Place Animal Thing, Dots and Boxes and Ludo – with bots, pass & play, or online with friends.` → Staged rollout 20% → **Send for review** → later raise to 100%.
+7. **Test and release → Production → Create new release** → promote the tested build → release notes `Gully Adda is here! Raja Mantri Chor Sipahi, Mafia, Chhupan Chhupai, Name Place Animal Thing, Dots and Boxes and Ludo – with bots, pass & play, or online with friends.` → Staged rollout 20% → **Send for review** → later raise to 100%.
 8. If you later add Google Sign-In / App Check: **Test and release → Setup → App signing** → copy the **app signing key SHA-1/SHA-256** into Firebase → Project settings → Android app → fingerprints.
 
 ---
@@ -165,6 +165,9 @@ Assets and texts are in `/store`. Do steps 1–6 once.
 - [ ] Test real multiplayer on devices with `store/MANUAL_TEST_CHECKLIST.md`.
 - [ ] Review moderation reports regularly (§8).
 - [ ] Optional: replace generated sounds/art with CC0 packs (see `CREDITS.md`), add Hindi strings (`apps/mobile/src/strings/hi.ts`).
+
+### Chhupan Chhupai (hide & seek) design note
+Real-time running games were out of scope for v1, so hide & seek is **turn-based**: hiders secretly pick one of 16 spots in a 9×9 mohalla (drawn in isometric 3D with SVG in `apps/mobile/src/games/TownView.tsx`; map data in `packages/engine/src/games/hideseek/town.ts`). Each round the seeker searches a spot or guards the den while hiders stay, sneak to a nearby spot (leaving a public "rustle" clue about the zone) or run for "Dhappa!" from a spot next to the den. Spots are secret server-side exactly like Mafia roles.
 
 ## Later (architecture ready, not built)
 Bluff, Seep, Teen Patti, Rummy (card helpers in `core/cards.ts`), Hangman, Tic-tac-toe, Book cricket, Chess, Antakshari, Dumb Charades, a Business-style trading game (generic design, no trademarked names).

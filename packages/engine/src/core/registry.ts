@@ -4,6 +4,7 @@ import { dots } from '../games/dots';
 import { npat } from '../games/npat';
 import { mafia } from '../games/mafia';
 import { ludo } from '../games/ludo';
+import { hideseek } from '../games/hideseek';
 
 /**
  * Every playable game. Adding a game = add a folder under src/games that
@@ -11,9 +12,9 @@ import { ludo } from '../games/ludo';
  * Card games later (Teen Patti, Rummy, Bluff, Seep) slot in the same way;
  * see src/core/cards.ts for the shared deck helpers.
  */
-export const GAMES: Record<GameId, AnyGame> = { rmcs, mafia, npat, dots, ludo };
+export const GAMES: Record<GameId, AnyGame> = { rmcs, mafia, npat, dots, ludo, hideseek };
 
-export const GAME_ORDER: GameId[] = ['rmcs', 'mafia', 'npat', 'dots', 'ludo'];
+export const GAME_ORDER: GameId[] = ['rmcs', 'mafia', 'hideseek', 'npat', 'dots', 'ludo'];
 
 export function getGame(id: string): AnyGame | null {
   return isGameId(id) ? GAMES[id] : null;

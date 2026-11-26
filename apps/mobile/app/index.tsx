@@ -17,7 +17,7 @@ export default function Home() {
           Gully <Text style={{ color: colors.saffron }}>Adda</Text>
         </Text>
         <View style={st.ribbon}>
-          <Text style={st.ribbonText}>🪁 🎲 👑 ✍️ 🕶️</Text>
+          <Text style={st.ribbonText}>🪁 🎲 👑 🙈 ✍️ 🕶️</Text>
         </View>
       </View>
 

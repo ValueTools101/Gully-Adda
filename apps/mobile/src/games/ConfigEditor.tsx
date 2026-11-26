@@ -66,6 +66,14 @@ export function ConfigEditor({
         </View>
       );
     }
+    case 'hideseek':
+      return (
+        <View>
+          <Stepper label={t('setup.matches')} value={num('matches')} min={1} max={8} onChange={(v) => set('matches', v)} />
+          <Stepper label={t('setup.maxRounds')} value={num('maxRounds')} min={3} max={15} onChange={(v) => set('maxRounds', v)} />
+          {online ? <Stepper label={t('setup.turnSeconds')} value={num('roundSeconds')} min={0} max={120} step={5} onChange={(v) => set('roundSeconds', v)} /> : null}
+        </View>
+      );
     case 'mafia': {
       const maxMafia = Math.max(1, Math.floor((players - 1) / 2));
       return (
@@ -93,5 +101,6 @@ export function localConfig(game: GameId, players: number, config: Cfg): Cfg {
   if (game === 'mafia') return { ...c, nightSeconds: 0, daySeconds: 0, voteSeconds: 0 };
   if (game === 'npat') return { ...c, graceSeconds: 5, challengeSeconds: 0 };
   if (game === 'rmcs') return { ...c, revealSeconds: 0, guessSeconds: 0 };
+  if (game === 'hideseek') return { ...c, hideSeconds: 0, roundSeconds: 0, revealSeconds: 0 };
   return { ...c, turnSeconds: 0 };
 }

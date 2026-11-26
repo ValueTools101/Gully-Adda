@@ -10,3 +10,4 @@ export * from './games/npat';
 export * from './games/npat/words';
 export * from './games/mafia';
 export * from './games/ludo';
+export * from './games/hideseek';

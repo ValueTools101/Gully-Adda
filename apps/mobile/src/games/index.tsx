@@ -1,6 +1,7 @@
-import { rmcs, mafia, npat, type GameId, type MafiaState, type NpatState, type PlayerId, type RmcsState } from '@gully/engine';
+import { rmcs, mafia, npat, hideseek, type GameId, type HnsState, type MafiaState, type NpatState, type PlayerId, type RmcsState } from '@gully/engine';
 import { colors } from '../theme';
 import { DotsBoard } from './DotsBoard';
+import { HideSeekBoard } from './HideSeekBoard';
 import { LudoBoard } from './LudoBoard';
 import { MafiaBoard } from './MafiaBoard';
 import { NpatBoard } from './NpatBoard';
@@ -47,6 +48,22 @@ export const GAME_UI: Record<GameId, GameUI> = {
     phaseKey: (s) => `${(s as NpatState).round}:${(s as NpatState).phase}`,
     privateTurns: (s, humans) => ((s as NpatState).phase === 'answer' && !s.over ? humans : []),
     privateDone: (s, pid) => notPending(npat.pendingActors(s as NpatState))(pid),
+  },
+  hideseek: {
+    id: 'hideseek',
+    emoji: '🙈',
+    color: colors.sky,
+    Board: HideSeekBoard,
+    sharedView: 'public',
+    phaseKey: (s) => `${(s as HnsState).match}:${(s as HnsState).phase}:${(s as HnsState).round}`,
+    // Hiding spots and every round's secret choice are made privately, one person at a time.
+    privateTurns: (s, humans) => {
+      const st = s as HnsState;
+      if (st.over || st.phase === 'reveal') return [];
+      const seeker = st.players[st.seekerIndex % st.players.length]?.id;
+      return humans.filter((h) => (st.phase === 'seek' && h === seeker) || st.status[h] === 'hiding');
+    },
+    privateDone: (s, pid) => notPending(hideseek.pendingActors(s as HnsState))(pid),
   },
   dots: {
     id: 'dots',

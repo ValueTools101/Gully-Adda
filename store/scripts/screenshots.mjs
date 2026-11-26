@@ -88,7 +88,20 @@ await page.getByTestId('npat-submit').click();
 await page.waitForTimeout(1500);
 await shot('06-npat-challenge.png');
 
-// 6. Dots and Boxes
+// 6. Chhupan Chhupai (hide & seek) in the 3D mohalla
+await startGame('hideseek');
+for (let i = 0; i < 8; i++) {
+  const stay = page.getByTestId('hns-stay');
+  const spot = page.locator('[data-testid^="spot-"]');
+  if (await stay.count() && i % 3 !== 2) await stay.click();
+  else if (await spot.count()) await spot.nth(i % (await spot.count())).click({ force: true });
+  await page.waitForTimeout(700);
+  if (await page.getByTestId('hns-next').count()) break;
+}
+await page.evaluate(() => window.scrollTo(0, 0));
+await shot('07-hide-seek.png');
+
+// 7. Dots and Boxes
 await startGame('dots');
 for (let i = 0; i < 14; i++) {
   const l = page.locator('[data-testid^="line-"]');
@@ -96,7 +109,7 @@ for (let i = 0; i < 14; i++) {
   if (n) await l.nth((i * 7) % n).click({ force: true }).catch(() => {});
   await page.waitForTimeout(900);
 }
-await shot('07-dots.png');
+await shot('08-dots.png');
 
 await browser.close();
 server.close();

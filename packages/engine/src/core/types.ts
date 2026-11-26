@@ -3,7 +3,7 @@ import type { Rng } from './rng';
 export type PlayerId = string;
 export type BotDifficulty = 'easy' | 'medium' | 'hard';
 
-export type GameId = 'rmcs' | 'mafia' | 'npat' | 'dots' | 'ludo';
+export type GameId = 'rmcs' | 'mafia' | 'npat' | 'dots' | 'ludo' | 'hideseek';
 
 export interface PlayerInfo {
   id: PlayerId;

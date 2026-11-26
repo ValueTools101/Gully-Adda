@@ -8,7 +8,7 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-non-null-assertion': 'off',
-      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       // The engine must stay pure: no UI, no backend, no clock, no global randomness.
       'no-restricted-imports': ['error', { patterns: ['react', 'react-*', 'firebase', 'firebase-*', '@firebase/*', 'expo*'] }],
       'no-restricted-properties': ['error', { object: 'Date', property: 'now', message: 'Pass ctx.now instead.' }],

@@ -16,7 +16,12 @@ export function seatColor(view: { players: PlayerInfo[] }, id: PlayerId): string
 }
 
 export function logText(e: LogEntry): string {
-  return t(`log.${e.key}`, e.params);
+  if (!e.params) return t(`log.${e.key}`);
+  // Translate id-like params (hide & seek spot / zone ids) into display names.
+  const p: Record<string, string | number> = { ...e.params };
+  if (typeof p.spot === 'string') p.spot = t(`hns.spot.${p.spot}`);
+  if (typeof p.zone === 'string') p.zone = t(`hns.zone.${p.zone}`);
+  return t(`log.${e.key}`, p);
 }
 
 /** Scores strip: every player with points and turn marker. */
@@ -75,6 +80,13 @@ const LOG_SOUNDS: Record<string, SoundName> = {
   'mafia.killed': 'lose',
   'mafia.eliminated': 'lose',
   'rmcs.rajaIs': 'reveal',
+  'hns.match': 'phase',
+  'hns.ready': 'reveal',
+  'hns.found': 'capture',
+  'hns.caughtAtDen': 'capture',
+  'hns.dhappa': 'win',
+  'hns.rustle': 'move',
+  'hns.empty': 'tap',
   'rmcs.caught': 'win',
   'rmcs.escaped': 'lose',
   'game.winner': 'win',
@@ -84,6 +96,9 @@ const LOG_SOUNDS: Record<string, SoundName> = {
 };
 
 const LOG_HAPTICS: Record<string, HapticKind> = {
+  'hns.found': 'heavy',
+  'hns.caughtAtDen': 'heavy',
+  'hns.dhappa': 'success',
   'ludo.captured': 'heavy',
   'npat.stop': 'heavy',
   'mafia.killed': 'warning',
