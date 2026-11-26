@@ -6,12 +6,14 @@
  */
 import { describe, expect, it } from 'vitest';
 import {
-  GAME_ORDER, HNS_SPOT_IDS, LUDO_HOME, Rng, botRng, getGame,
+  GAME_ORDER, LUDO_HOME, Rng, botRng, getGame,
   type BaseState, type BotDifficulty, type GameId,
 } from '../src';
 import { T0, players } from './helpers';
 
 const RUNS = Number(process.env.FUZZ_RUNS ?? 150);
+/** Hide & seek runs full real-time simulations per move, so fewer chaotic games. */
+const runsFor = (id: GameId) => (id === 'hideseek' ? Math.max(3, Math.round(RUNS / 15)) : RUNS);
 const DIFFS: BotDifficulty[] = ['easy', 'medium', 'hard'];
 
 const GARBAGE: unknown[] = [
@@ -23,11 +25,12 @@ const GARBAGE: unknown[] = [
   { type: 'answer', answers: { name: 'Zebra', __proto__: 'x' } }, { type: 'answer', answers: null },
   { type: 'challenge', target: 'p1', category: 'name', reject: 'yes' }, { type: 'challenge', target: 'p0', category: 'nope', reject: true },
   { type: 'hide', spot: 'mars' }, { type: 'hide', spot: 'temple' }, { type: 'search', spot: '__proto__' }, { type: 'move', spot: 'bus' },
-  { type: 'dhappa' }, { type: 'guard' }, { type: 'stay' }, { type: 'ack' }, { type: 'ready' }, { type: 'stop' }, { type: 'submit' },
+  { type: 'submit', inputs: '' }, { type: 'submit', inputs: '\u0000\uffff' }, { type: 'submit', inputs: 'Z'.repeat(3000) }, { type: 'submit', inputs: 123 },
+  { type: 'submit', inputs: '1'.repeat(50) }, { type: 'dhappa' }, { type: 'guard' }, { type: 'stay' }, { type: 'ack' }, { type: 'ready' }, { type: 'stop' }, { type: 'submit' },
   { type: 'roll' }, { type: 'constructor' }, { type: 'toString' },
 ];
 
-const SIZES: Record<GameId, [number, number]> = { rmcs: [4, 4], mafia: [5, 12], npat: [2, 10], dots: [2, 4], ludo: [2, 4], hideseek: [3, 8] };
+const SIZES: Record<GameId, [number, number]> = { rmcs: [4, 4], mafia: [5, 12], npat: [2, 10], dots: [2, 4], ludo: [2, 4], hideseek: [1, 4] };
 
 function randomConfig(rng: Rng): unknown {
   const pool: unknown[] = [
@@ -85,9 +88,8 @@ function checkInvariants(id: GameId, s: BaseState): void {
       break;
     }
     case 'hideseek': {
-      for (const sp of Object.values(any.spots as Record<string, string>)) expect(HNS_SPOT_IDS).toContain(sp);
-      const seeker = ids[(any.seekerIndex as number) % ids.length];
-      expect(Object.keys(any.status as object)).not.toContain(seeker);
+      expect((any.rounds as unknown[]).length).toBe(any.round);
+      for (const r of any.results as Record<string, { score: number }>[]) for (const v of Object.values(r)) expect(Number.isFinite(v.score) && v.score >= 0).toBe(true);
       break;
     }
   }
@@ -109,9 +111,9 @@ function checkSecrets(id: GameId, s: BaseState): void {
       for (const [o, r] of Object.entries(any.slips)) if (o !== p.id && r !== 'raja') expect(v.known[o]).toBeUndefined();
     }
     if (id === 'npat' && any.phase === 'answer') expect(v.revealed).toEqual({});
-    if (id === 'hideseek' && any.phase !== 'reveal') {
-      for (const k of Object.keys(v.knownSpots)) expect(any.status[k]).toBe('found');
-      if (v.amSeeker) expect(v.mySpot).toBeNull();
+    if (id === 'hideseek' && any.phase === 'play') {
+      // Other players' scores stay hidden until everyone has finished the round.
+      expect(v.results.length).toBe(any.round - 1);
     }
   }
   const pub = JSON.stringify(g.getPublicState(s));
@@ -119,9 +121,9 @@ function checkSecrets(id: GameId, s: BaseState): void {
 }
 
 describe.each(GAME_ORDER)('fuzz: %s', (id) => {
-  it(`${RUNS} chaotic games: no throws, no mutation, invariants, no leaks`, () => {
+  it(`chaotic games: no throws, no mutation, invariants, no leaks`, () => {
     const g = getGame(id)!;
-    for (let run = 1; run <= RUNS; run++) {
+    for (let run = 1; run <= runsFor(id); run++) {
       const rng = new Rng(run * 104729);
       const [min, max] = SIZES[id];
       const n = rng.range(min, max);

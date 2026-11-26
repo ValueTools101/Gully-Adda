@@ -68,10 +68,15 @@ export function ConfigEditor({
     }
     case 'hideseek':
       return (
-        <View>
-          <Stepper label={t('setup.matches')} value={num('matches')} min={1} max={8} onChange={(v) => set('matches', v)} />
-          <Stepper label={t('setup.maxRounds')} value={num('maxRounds')} min={3} max={15} onChange={(v) => set('maxRounds', v)} />
-          {online ? <Stepper label={t('setup.turnSeconds')} value={num('roundSeconds')} min={0} max={120} step={5} onChange={(v) => set('roundSeconds', v)} /> : null}
+        <View style={{ gap: 6 }}>
+          <Stepper label={t('setup.rounds')} value={num('rounds')} min={1} max={6} onChange={(v) => set('rounds', v)} />
+          <Stepper label={t('setup.roundSeconds')} value={num('roundSeconds')} min={20} max={120} step={5} onChange={(v) => set('roundSeconds', v)} />
+          <P>{t('hns.aiLevel')}</P>
+          <Segment
+            options={[{ value: 'easy', label: t('setup.easy') }, { value: 'medium', label: t('setup.medium') }, { value: 'hard', label: t('setup.hard') }]}
+            value={String(c.aiLevel)}
+            onChange={(v) => set('aiLevel', v)}
+          />
         </View>
       );
     case 'mafia': {
@@ -101,6 +106,6 @@ export function localConfig(game: GameId, players: number, config: Cfg): Cfg {
   if (game === 'mafia') return { ...c, nightSeconds: 0, daySeconds: 0, voteSeconds: 0 };
   if (game === 'npat') return { ...c, graceSeconds: 5, challengeSeconds: 0 };
   if (game === 'rmcs') return { ...c, revealSeconds: 0, guessSeconds: 0 };
-  if (game === 'hideseek') return { ...c, hideSeconds: 0, roundSeconds: 0, revealSeconds: 0 };
+  if (game === 'hideseek') return { ...c, submitGraceSeconds: 0 };
   return { ...c, turnSeconds: 0 };
 }

@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useState, type ReactNode } from 'react';
 import {
-  ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
+  ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View,
   type StyleProp, type TextInputProps, type TextStyle, type ViewStyle,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -212,6 +212,45 @@ export function Countdown({ deadline, dark, onTick }: { deadline: number | null;
   );
 }
 
+/** Bullet list (used for all how-to-play text). */
+export function Bullets({ items, dark }: { items: string[]; dark?: boolean }) {
+  return (
+    <View style={{ gap: 6 }}>
+      {items.map((s, i) => (
+        <View key={i} style={{ flexDirection: 'row', gap: 8 }}>
+          <Text style={[styles.bullet, dark && { color: colors.mustard }]}>•</Text>
+          <Text style={[styles.bulletText, dark && { color: colors.cream }]}>{s}</Text>
+        </View>
+      ))}
+    </View>
+  );
+}
+
+/** "?" button that opens the game's bullet-point rules in a sheet. */
+export function HelpButton({ game, dark }: { game: string; dark?: boolean }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Pressable accessibilityRole="button" accessibilityLabel={t('home.howToPlay')} onPress={() => setOpen(true)} style={styles.iconBtn} hitSlop={8} testID="help">
+        <View style={[styles.help, dark && { borderColor: colors.cream }]}>
+          <Text style={[styles.helpText, dark && { color: colors.cream }]}>?</Text>
+        </View>
+      </Pressable>
+      <Modal visible={open} transparent animationType="slide" onRequestClose={() => setOpen(false)}>
+        <Pressable style={styles.sheetBackdrop} onPress={() => setOpen(false)}>
+          <Pressable style={styles.sheet} onPress={() => {}}>
+            <H2>📖 {t(`game.${game}.title`)}</H2>
+            <ScrollView style={{ maxHeight: 420 }}>
+              <Bullets items={t(`rules.${game}`).split('\n')} />
+            </ScrollView>
+            <Btn label={t('common.close')} onPress={() => setOpen(false)} />
+          </Pressable>
+        </Pressable>
+      </Modal>
+    </>
+  );
+}
+
 export function Row({ children, style }: { children: ReactNode; style?: StyleProp<ViewStyle> }) {
   return <View style={[styles.row, style]}>{children}</View>;
 }
@@ -252,5 +291,11 @@ export const styles = StyleSheet.create({
   knob: { width: 24, height: 24, borderRadius: 12, backgroundColor: colors.white, borderWidth: 2, borderColor: colors.ink },
   input: { borderWidth: 2, borderColor: colors.ink, borderRadius: radius.sm, backgroundColor: colors.white, paddingHorizontal: 12, minHeight: 48, fontFamily: fonts.body, fontSize: 16, color: colors.ink },
   timer: { alignSelf: 'flex-start', backgroundColor: colors.teal, borderRadius: 999, borderWidth: 2, borderColor: colors.ink, paddingHorizontal: 12, paddingVertical: 4 },
+  bullet: { fontFamily: fonts.heading, fontSize: 16, color: colors.maroon, lineHeight: 22 },
+  bulletText: { flex: 1, fontFamily: fonts.body, fontSize: 15, lineHeight: 22, color: colors.ink },
+  help: { width: 30, height: 30, borderRadius: 15, borderWidth: 2, borderColor: colors.ink, alignItems: 'center', justifyContent: 'center' },
+  helpText: { fontFamily: fonts.heading, fontSize: 18, color: colors.ink, lineHeight: 22 },
+  sheetBackdrop: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'flex-end' },
+  sheet: { backgroundColor: colors.paper, borderTopLeftRadius: 24, borderTopRightRadius: 24, borderWidth: 3, borderColor: colors.ink, padding: 20, gap: 12, maxWidth: 640, width: '100%', alignSelf: 'center' },
   timerText: { fontFamily: fonts.heading, fontSize: 16, color: colors.white },
 });

@@ -99,3 +99,30 @@ describe('Raja Mantri Chor Sipahi', () => {
     expect(JSON.stringify(s)).toBe(before);
   });
 });
+
+describe('Raja prediction', () => {
+  it('only the Raja can predict, once, and earns +100 when right', () => {
+    let s = start(11);
+    const raja = holder(s, 'raja');
+    const other = holder(s, 'sipahi');
+    expect(rmcs.applyAction(s, other, { type: 'predict', correct: true }, ctx).ok).toBe(false);
+    let r = rmcs.applyAction(s, raja, { type: 'predict', correct: true }, ctx);
+    expect(r.ok).toBe(true);
+    s = (r as { state: RmcsState }).state;
+    expect(rmcs.applyAction(s, raja, { type: 'predict', correct: false }, ctx).ok).toBe(false);
+    expect(rmcs.getPlayerView(s, other).prediction).toBe(true); // public
+    s = ackAll(s);
+    r = rmcs.applyAction(s, holder(s, 'mantri'), { type: 'guess', target: holder(s, 'chor') }, ctx);
+    s = (r as { state: RmcsState }).state;
+    expect(s.totals[raja]).toBe(1100);
+  });
+
+  it('a wrong prediction gives no bonus', () => {
+    let s = start(12);
+    const raja = holder(s, 'raja');
+    s = (rmcs.applyAction(s, raja, { type: 'predict', correct: true }, ctx) as { state: RmcsState }).state;
+    s = ackAll(s);
+    s = (rmcs.applyAction(s, holder(s, 'mantri'), { type: 'guess', target: holder(s, 'sipahi') }, ctx) as { state: RmcsState }).state;
+    expect(s.totals[raja]).toBe(1000);
+  });
+});

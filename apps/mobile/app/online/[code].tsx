@@ -1,18 +1,19 @@
 import { GAME_ORDER, getGame, type BotDifficulty, type GameAction, type MafiaView } from '@gully/engine';
 import * as Clipboard from 'expo-clipboard';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Share, StyleSheet, Text, View } from 'react-native';
 import { useLogSounds } from '../../src/components/game';
-import { Btn, Card, Chip, H2, Header, P, Row, Screen, Segment, Stepper } from '../../src/components/ui';
+import { Btn, Card, Chip, H2, Header, HelpButton, P, Row, Screen, Segment, Stepper } from '../../src/components/ui';
 import { GAME_UI } from '../../src/games';
 import { ConfigEditor } from '../../src/games/ConfigEditor';
 import { GameNavContext } from '../../src/games/nav';
 import { feedback } from '../../src/lib/feedback';
 import { useSettings } from '../../src/lib/settings';
 import { api, errorMessage, type RoomDoc } from '../../src/online/api';
-import { canSpeak } from '../../src/online/chatPolicy';
 import { ChatPanel } from '../../src/online/ChatPanel';
+import { FloatingReactions, REACTION_PREFIX, ReactionBar, useFloaters } from '../../src/components/Reactions';
+import { canSpeak, writableChannels } from '../../src/online/chatPolicy';
 import { PlayersSheet } from '../../src/online/PlayersSheet';
 import { useRoom } from '../../src/online/useRoom';
 import { t } from '../../src/strings';
@@ -27,6 +28,21 @@ export default function OnlineRoom() {
   const { settings } = useSettings();
   const [err, setErr] = useState('');
   useLogSounds(view?.log ?? [], view?.version ?? 0);
+  const floaters = useFloaters();
+  const addFloater = floaters.add;
+  const seenChat = useRef<Set<string> | null>(null);
+  useEffect(() => {
+    // Float new reactions (ignore ones that were already there when we opened the room).
+    if (!seenChat.current) {
+      seenChat.current = new Set(chat.map((m) => m.id));
+      return;
+    }
+    for (const m of chat) {
+      if (seenChat.current.has(m.id)) continue;
+      seenChat.current.add(m.id);
+      if (m.text.startsWith(REACTION_PREFIX) && !settings.blocked[m.from]) addFloater(m.text.slice(REACTION_PREFIX.length, REACTION_PREFIX.length + 4), m.from === uid ? t('common.you') : m.name);
+    }
+  }, [chat, addFloater, settings.blocked, uid]);
 
   const leave = async () => {
     await api.leaveRoom(code).catch(() => {});
@@ -66,10 +82,16 @@ export default function OnlineRoom() {
     });
   };
 
+  const reactChannel = writableChannels(view, room.status)[0];
+  const react = (e: string) => {
+    if (reactChannel) api.sendChat(code, reactChannel, `${REACTION_PREFIX}${e}`).catch((x) => setErr(errorMessage(x)));
+  };
+
   return (
     <GameNavContext.Provider value={nav}>
+      <View style={{ flex: 1 }}>
       <Screen dark={dark} testID="online-room">
-        <Header title={inGame ? t(`game.${room.game}.title`) : t('online.lobby', { code })} dark={dark} onBack={leave} />
+        <Header title={inGame ? t(`game.${room.game}.title`) : t('online.lobby', { code })} dark={dark} onBack={leave} right={<HelpButton game={room.game} dark={dark} />} />
         {!connected ? <P style={{ color: colors.danger }}>📡 {t('online.offline')}</P> : null}
         {inGame ? (
           <>
@@ -90,10 +112,13 @@ export default function OnlineRoom() {
           <Lobby room={room} uid={uid} onError={setErr} />
         )}
         {err && !inGame ? <P style={{ color: colors.danger }}>{err}</P> : null}
-        <ChatPanel code={code} chat={chat} view={view} status={room.status} uid={uid} dark={dark} />
+        <ReactionBar dark={dark} onReact={react} disabled={!reactChannel} />
+        <ChatPanel code={code} chat={chat.filter((m) => !m.text.startsWith(REACTION_PREFIX))} view={view} status={room.status} uid={uid} dark={dark} />
         <PlayersSheet room={room} uid={uid} dark={dark} />
         <Btn kind="ghost" small label={t('online.leave')} onPress={leave} />
       </Screen>
+      <FloatingReactions items={floaters.items} />
+      </View>
     </GameNavContext.Provider>
   );
 }

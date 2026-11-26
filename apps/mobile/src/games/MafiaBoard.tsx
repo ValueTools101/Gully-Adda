@@ -95,6 +95,21 @@ export function MafiaBoard({ view, act, actGroup, shared }: BoardProps<MafiaView
       {showPrivate && !view.amAlive ? (
         <Card dark>
           <P style={{ color: colors.cream }}>👻 {t('mafia.youAreOut')}</P>
+          {legal.some((a) => a.type === 'ghost') ? (
+            <>
+              <H2 style={{ color: colors.mustard }}>{t('mafia.ghostTitle')}</H2>
+              <P style={{ color: colors.cream }}>{t('mafia.ghostHint')}</P>
+              <View style={st.grid}>
+                {legal.filter((a) => a.type === 'ghost').map((a) => (
+                  <Btn key={a.target} small kind="dark" label={`👻 ${playerName(view, a.target)}`} onPress={() => act({ type: 'ghost', target: a.target } as never)} testID={`mafia-ghost-${a.target}`} />
+                ))}
+              </View>
+            </>
+          ) : (view.ghostGuesses[view.me ?? ''] ?? []).length ? (
+            <P style={{ color: colors.mustard }}>
+              {t('mafia.ghostDone', { names: (view.ghostGuesses[view.me ?? ''] ?? []).map((g) => playerName(view, g.target)).join(', ') })}
+            </P>
+          ) : null}
         </Card>
       ) : null}
 

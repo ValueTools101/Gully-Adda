@@ -1,6 +1,6 @@
 # Gully Adda: 90s Retro Games
 
-Classic Indian 90s/2000s adda games on your phone — **Raja Mantri Chor Sipahi, Mafia, Chhupan Chhupai (Hide & Seek in an isometric 3D mohalla), Name Place Animal Thing, Dots and Boxes, Ludo** — playable **vs bots (offline)**, **pass & play on one phone**, or **online with friends** (6-character room codes).
+Classic Indian 90s/2000s adda games on your phone — **Raja Mantri Chor Sipahi, Mafia, Chhupan Chhupai (real-time Hide & Seek in a 3D mohalla), Name Place Animal Thing, Dots and Boxes, Ludo** — playable **vs bots (offline)**, **pass & play on one phone**, or **online with friends** (6-character room codes).
 
 Expo (React Native) + TypeScript strict · Firebase (anonymous Auth, Firestore, Cloud Functions 2nd gen) · LiveKit voice (optional) · EAS builds · Android first.
 
@@ -167,7 +167,7 @@ Assets and texts are in `/store`. Do steps 1–6 once.
 - [ ] Optional: replace generated sounds/art with CC0 packs (see `CREDITS.md`), add Hindi strings (`apps/mobile/src/strings/hi.ts`).
 
 ### Chhupan Chhupai (hide & seek) design note
-Real-time running games were out of scope for v1, so hide & seek is **turn-based**: hiders secretly pick one of 16 spots in a 9×9 mohalla (drawn in isometric 3D with SVG in `apps/mobile/src/games/TownView.tsx`; map data in `packages/engine/src/games/hideseek/town.ts`). Each round the seeker searches a spot or guards the den while hiders stay, sneak to a nearby spot (leaving a public "rustle" clue about the zone) or run for "Dhappa!" from a spot next to the den. Spots are secret server-side exactly like Mafia roles.
+Real-time, joystick-controlled hide & seek in an isometric 3D mohalla (`apps/mobile/src/games/hideseek/RealtimeRound.tsx`). The simulation lives in the shared engine (`packages/engine/src/games/hideseek/sim.ts`): fixed 20 Hz ticks, seeded AI for the seeker and the other kids, and only `+ - * /` and `sqrt` on positions so a round replays identically on any JS engine. The phone records one input per tick; online, the server **replays the input string to compute the score**, so scores can't be faked. Each round every player plays their own run in the same map and role (odd rounds hide, even rounds seek) and scores are compared. Known limit: a determined cheater could script inputs offline, since the level seed is shared with the client.
 
 ## Later (architecture ready, not built)
 Bluff, Seep, Teen Patti, Rummy (card helpers in `core/cards.ts`), Hangman, Tic-tac-toe, Book cricket, Chess, Antakshari, Dumb Charades, a Business-style trading game (generic design, no trademarked names).

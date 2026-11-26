@@ -139,3 +139,23 @@ describe('Mafia', () => {
     expect(mafia.applyAction(s, m, { type: 'kill', target: m }, ctx).ok).toBe(false);
   });
 });
+
+describe('ghost guesses for players who are out', () => {
+  it('out players guess once per day; correct guesses score at the end; living players cannot', () => {
+    let s = toNight(start(8, 6));
+    const victim = who(s, 'villager')[0]!;
+    for (const m of who(s, 'mafia')) s = act(s, m, { type: 'kill', target: victim });
+    s = act(s, who(s, 'doctor')[0]!, { type: 'save', target: who(s, 'doctor')[0]! });
+    s = act(s, who(s, 'detective')[0]!, { type: 'check', target: who(s, 'doctor')[0]! });
+    expect(s.phase).toBe('day');
+    const m = who(s, 'mafia')[0]!;
+    expect(mafia.applyAction(s, s.alive[0]!, { type: 'ghost', target: m }, ctx).ok).toBe(false);
+    s = act(s, victim, { type: 'ghost', target: m });
+    expect(mafia.applyAction(s, victim, { type: 'ghost', target: m }, ctx).ok).toBe(false); // once per day
+    expect(mafia.getPlayerView(s, victim).ghostGuesses[victim]).toEqual([{ day: 1, target: m }]);
+    expect(mafia.getPlayerView(s, m).ghostGuesses).toEqual({}); // private
+    expect(mafia.pendingActors(s)).not.toContain(victim); // never blocks the game
+    const before = mafia.scores({ ...s, winner: null } as MafiaState)[victim]!;
+    expect(before).toBe(25);
+  });
+});

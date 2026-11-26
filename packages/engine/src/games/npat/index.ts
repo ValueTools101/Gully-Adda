@@ -85,6 +85,8 @@ export interface NpatView extends BaseView {
   ready: PlayerId[];
   totals: Record<PlayerId, number>;
   history: NpatRound[];
+  /** How many boxes each player has filled (counts only, never the answers). */
+  filled: Record<PlayerId, number>;
 }
 
 export function normalizeAnswer(s: string): string {
@@ -437,5 +439,6 @@ function view(s: NpatState, me: PlayerId | null): NpatView {
     ready: clone(s.ready),
     totals: clone(s.totals),
     history: clone(s.history),
+    filled: Object.fromEntries(s.players.map((p) => [p.id, Object.values(s.answers[p.id] ?? {}).filter((v) => v.trim()).length])),
   };
 }

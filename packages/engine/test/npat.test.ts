@@ -97,3 +97,13 @@ describe('Name Place Animal Thing', () => {
     expect(Object.keys(s.answers.p0!)).toEqual(s.config.categories);
   });
 });
+
+describe('live progress', () => {
+  it('others see how many boxes you filled, never the words', () => {
+    let s = start(2);
+    s = act(s, 'p0', { type: 'answer', answers: { name: `${s.letter}zzsecret`, place: '', animal: `${s.letter}qq`, thing: '' } });
+    const v = npat.getPlayerView(s, 'p1');
+    expect(v.filled.p0).toBe(2);
+    expect(JSON.stringify(v)).not.toContain('zzsecret');
+  });
+});

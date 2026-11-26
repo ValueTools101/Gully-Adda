@@ -10,7 +10,7 @@ Every asset that ships in the app or on the store listing is listed here.
 | App icon, adaptive icon, splash, favicon | app | Original vector art in `store/scripts/art.mjs`, rendered by `generate-graphics.mjs` | CC0 (made for this project) |
 | Feature graphic, 512 icon | store | Same as above | CC0 |
 | Game cover illustrations, bunting garland, night/day sky, confetti, pass-the-phone art | app | Original SVG/animations in `apps/mobile/src/art/` | CC0 (made for this project) |
-| Isometric 3D mohalla (hide & seek town, buildings, den) | app | Original SVG drawn in code (`apps/mobile/src/games/TownView.tsx`) | CC0 (made for this project) |
+| Real-time isometric 3D mohalla, kids, torch beam, joystick | app | Original SVG drawn in code (`apps/mobile/src/games/hideseek/`) | CC0 (made for this project) |
 | Ludo board, dice, tokens, Dots grid, chits | app | Original SVG drawn in code (`apps/mobile/src/games/*`) | CC0 (made for this project) |
 | Emoji (👑 🕶️ 🎲 etc.) | app UI | Rendered with the phone's system emoji font; no emoji images are bundled | n/a |
 | Store screenshots | store | Captured from the real app by `store/scripts/screenshots.mjs` | CC0 |
@@ -24,4 +24,5 @@ The build machine could not reach kenney.nl or Google Fonts directly (fonts came
 Expo / React Native (MIT), Firebase JS SDK and Admin SDK (Apache-2.0), LiveKit client and server SDKs (Apache-2.0), react-native-svg (MIT) and others listed in each `package.json`.
 
 ## Trademarks
+Chhupan Chhupai is inspired by the playground game and by the hide-and-seek genre in general; it does not reuse any other app's name, characters, levels, art or sounds.
 Game names used are traditional/generic. No brand names, logos or trade dress of commercial board games are used.

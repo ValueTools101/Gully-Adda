@@ -34,7 +34,9 @@ export const GAME_UI: Record<GameId, GameUI> = {
       if (st.over) return [];
       if (st.phase === 'roles') return humans;
       // Every living person takes the phone at night, so nobody can tell roles apart by who holds it.
-      if (st.phase === 'night' || st.phase === 'vote') return humans.filter((h) => st.alive.includes(h));
+      if (st.phase === 'night') return humans.filter((h) => st.alive.includes(h));
+      // Vote: living players vote in secret; players who are out make their ghost guess.
+      if (st.phase === 'vote') return humans;
       return [];
     },
     privateDone: (s, pid) => notPending(mafia.pendingActors(s as MafiaState))(pid),
@@ -55,14 +57,9 @@ export const GAME_UI: Record<GameId, GameUI> = {
     color: colors.sky,
     Board: HideSeekBoard,
     sharedView: 'public',
-    phaseKey: (s) => `${(s as HnsState).match}:${(s as HnsState).phase}:${(s as HnsState).round}`,
-    // Hiding spots and every round's secret choice are made privately, one person at a time.
-    privateTurns: (s, humans) => {
-      const st = s as HnsState;
-      if (st.over || st.phase === 'reveal') return [];
-      const seeker = st.players[st.seekerIndex % st.players.length]?.id;
-      return humans.filter((h) => (st.phase === 'seek' && h === seeker) || st.status[h] === 'hiding');
-    },
+    phaseKey: (s) => `${(s as HnsState).round}:${(s as HnsState).phase}`,
+    // Pass & play: everyone plays their own real-time round, one after another.
+    privateTurns: (s, humans) => ((s as HnsState).phase === 'play' && !s.over ? humans : []),
     privateDone: (s, pid) => notPending(hideseek.pendingActors(s as HnsState))(pid),
   },
   dots: {

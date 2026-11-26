@@ -133,7 +133,11 @@ export function NpatBoard({ view, act, actGroup, mode, shared }: BoardProps<Npat
       <PlayerStrip
         view={view}
         scores={view.totals}
-        extra={(id) => (view.phase === 'answer' && view.submitted.includes(id) ? <Text>✅</Text> : null)}
+        extra={(id) =>
+          view.phase === 'answer' ? (
+            view.submitted.includes(id) ? <Text>✅</Text> : <Text style={st.progress}>✍️ {view.filled[id] ?? 0}/{cats.length}</Text>
+          ) : null
+        }
       />
 
       {view.phase === 'answer' && !shared && iAmPending ? <AnswerForm key={`${view.round}-${view.me}`} view={view} act={act} mode={mode} /> : null}
@@ -200,6 +204,7 @@ export function NpatBoard({ view, act, actGroup, mode, shared }: BoardProps<Npat
 }
 
 const st = StyleSheet.create({
+  progress: { fontFamily: fonts.bodyBold, fontSize: 12, color: colors.teal },
   notebook: { backgroundColor: '#FFFEF8', paddingLeft: 34, overflow: 'hidden' },
   margin: { position: 'absolute', left: 26, top: 0, bottom: 0, width: 2, backgroundColor: '#EF9A9A' },
   rule: { position: 'absolute', left: 0, right: 0, height: 1, backgroundColor: '#BBDEFB' },

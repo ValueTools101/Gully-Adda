@@ -11,9 +11,9 @@ Play 90s retro adda games with bots, friends on one phone, or online.
 Remember the summer holidays? Chits folded in a tiffin box, a Ludo board on the floor, "Dhappa!" echoing through the gully, a notebook full of Name Place Animal Thing, and that one cousin who was always the Mafia. Gully Adda brings the classic Indian 90s and 2000s adda games to your phone.
 
 PLAY 6 DESI CLASSICS
-• Raja Mantri Chor Sipahi: everyone peeks at their chit, the Raja calls "Mantri, find the Chor!" and the Mantri has one guess. Raja 1000, Mantri 800, Sipahi 500, Chor 800 if he escapes. Choose how many rounds.
-• Mafia: the village sleeps, the Mafia wake up. With Doctor, Detective and Villagers, 5 to 12 players. The app is your narrator, so nobody has to sit out.
-• Chhupan Chhupai (Hide & Seek): pick a secret hiding spot in a colourful 3D mohalla: behind the water tank, inside the auto, under the staircase. The seeker searches one spot a round; sneak closer, listen for rustles, and dash to the den shouting "Dhappa!" before you are found. 3 to 8 players.
+• Raja Mantri Chor Sipahi: everyone peeks at their chit, the Raja calls "Mantri, find the Chor!" and the Mantri has one guess. The Raja can bet on the Mantri for bonus points. Raja 1000, Mantri 800, Sipahi 500, Chor 800 if he escapes. Choose how many rounds.
+• Mafia: the village sleeps, the Mafia wake up. With Doctor, Detective and Villagers, 5 to 12 players. The app is your narrator, so nobody has to sit out, and players who are out keep playing with ghost guesses.
+• Chhupan Chhupai (Hide & Seek): a real-time chase through a colourful 3D mohalla. Grab the joystick, run and hide behind houses, neem trees, autos and haystacks while the seeker sweeps a torch beam around. Free caught friends, collect marbles, then swap roles and become the seeker yourself. Everyone plays every round: 1 to 8 players.
 • Name Place Animal Thing: one random letter, four boxes, press STOP when you are done. Unique answer 10 points, same answer 5. Challenge doubtful answers and vote them out. Add categories like Food, Movie or City.
 • Dots and Boxes: join the dots, close the boxes and take an extra turn. 4x4 or 5x5 boards, 2 to 4 players.
 • Ludo: roll a 6 to come out, cut your cousins, race home. Safe stars, exact roll to finish, three 6s and you lose the turn. 2 to 4 players.
@@ -26,7 +26,8 @@ THREE WAYS TO PLAY
 FAIR PLAY, BUILT IN
 Online games run on our server: dice, shuffles and roles are random on the server, every move is checked, and nobody can peek at someone else's role or answers.
 
-MAFIA VOICE AND CHAT
+REACTIONS, MAFIA VOICE AND CHAT
+Send quick emoji reactions in every game.
 Talk in the day, stay silent at night. Players who are out can listen but cannot speak. Text chat follows the same rules. Report or block anyone in a room.
 
 100% NOSTALGIA, 0% PAY-TO-WIN

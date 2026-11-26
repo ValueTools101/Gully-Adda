@@ -15,7 +15,7 @@ import {
 export type RmcsRole = 'raja' | 'mantri' | 'chor' | 'sipahi';
 export const RMCS_ROLES: RmcsRole[] = ['raja', 'mantri', 'chor', 'sipahi'];
 
-export const RMCS_POINTS = { raja: 1000, mantriRight: 800, sipahi: 500, chorEscaped: 800 } as const;
+export const RMCS_POINTS = { raja: 1000, mantriRight: 800, sipahi: 500, chorEscaped: 800, rajaPrediction: 100 } as const;
 
 export interface RmcsConfig {
   rounds: number;
@@ -45,11 +45,14 @@ export interface RmcsState extends BaseState {
   acked: PlayerId[];
   totals: Record<PlayerId, number>;
   history: RmcsRoundResult[];
+  /** Raja's public prediction this round: will the Mantri catch the Chor? */
+  prediction: boolean | null;
 }
 
 export type RmcsAction =
   | { type: 'ack' }
-  | { type: 'guess'; target: PlayerId };
+  | { type: 'guess'; target: PlayerId }
+  | { type: 'predict'; correct: boolean };
 
 export interface RmcsView extends BaseView {
   game: 'rmcs';
@@ -62,6 +65,7 @@ export interface RmcsView extends BaseView {
   acked: PlayerId[];
   totals: Record<PlayerId, number>;
   history: RmcsRoundResult[];
+  prediction: boolean | null;
 }
 
 function roleHolder(s: RmcsState, role: RmcsRole): PlayerId {
@@ -77,6 +81,7 @@ function dealRound(s: RmcsState, ctx: GameContext): void {
   });
   s.phase = 'peek';
   s.acked = [];
+  s.prediction = null;
   s.deadline = deadlineIn(ctx, s.config.revealSeconds);
   const raja = roleHolder(s, 'raja');
   pushLog(s, 'rmcs.round', { n: s.round });
@@ -100,6 +105,7 @@ function resolveGuess(s: RmcsState, target: PlayerId, ctx: GameContext): void {
     else if (role === 'sipahi') pts = RMCS_POINTS.sipahi;
     else if (role === 'mantri') pts = correct ? RMCS_POINTS.mantriRight : 0;
     else if (role === 'chor') pts = correct ? 0 : RMCS_POINTS.chorEscaped;
+    if (role === 'raja' && s.prediction !== null && s.prediction === correct) pts += RMCS_POINTS.rajaPrediction;
     points[p.id] = pts;
     s.totals[p.id] = (s.totals[p.id] ?? 0) + pts;
   }
@@ -162,6 +168,7 @@ function makeView(s: RmcsState, me: PlayerId | null): RmcsView {
     acked: clone(s.acked),
     totals: clone(s.totals),
     history: clone(s.history),
+    prediction: s.prediction,
   };
 }
 
@@ -190,6 +197,7 @@ export const rmcs: GameDefinition<RmcsConfig, RmcsState, RmcsAction, RmcsView> =
       acked: [],
       totals: Object.fromEntries(players.map((p) => [p.id, 0])),
       history: [],
+      prediction: null,
     };
     dealRound(s, ctx);
     return s;
@@ -199,14 +207,25 @@ export const rmcs: GameDefinition<RmcsConfig, RmcsState, RmcsAction, RmcsView> =
   getPlayerView: (s, id) => makeView(s, hasPlayer(s, id) ? id : null),
 
   listLegalActions(s, id) {
-    if (s.over || !pending(s).includes(id)) return [];
-    if (s.phase === 'guess') return guessTargets(s).map((target) => ({ type: 'guess', target }));
-    return [{ type: 'ack' }];
+    if (s.over) return [];
+    const out: RmcsAction[] = [];
+    // The Raja may predict (once) before the Mantri guesses. Optional: it never blocks the game.
+    if (s.phase !== 'result' && s.prediction === null && s.slips[id] === 'raja') out.push({ type: 'predict', correct: true }, { type: 'predict', correct: false });
+    if (!pending(s).includes(id)) return out;
+    if (s.phase === 'guess') return [...out, ...guessTargets(s).map((target) => ({ type: 'guess', target }) as RmcsAction)];
+    return [...out, { type: 'ack' }];
   },
 
   applyAction(state, id, action, ctx) {
     if (state.over) return reject('game_over');
     if (!hasPlayer(state, id)) return reject('not_in_game');
+    if (action.type === 'predict') {
+      if (state.slips[id] !== 'raja' || state.phase === 'result' || state.prediction !== null) return reject('cannot_predict');
+      const s = clone(state);
+      s.prediction = action.correct === true;
+      pushLog(s, s.prediction ? 'rmcs.predictYes' : 'rmcs.predictNo', { name: playerName(s, id) });
+      return accept(s);
+    }
     if (!pending(state).includes(id)) return reject('not_your_turn');
     const s = clone(state);
     if (action.type === 'ack') {
@@ -247,12 +266,16 @@ export const rmcs: GameDefinition<RmcsConfig, RmcsState, RmcsAction, RmcsView> =
   getBotAction(s, botId, _d: BotDifficulty, rng) {
     const legal = rmcs.listLegalActions(s, botId);
     if (legal.length === 0) return null;
-    return rng.pick(legal); // Mantri has no information: a fair coin flip.
+    const predict = legal.filter((a) => a.type === 'predict');
+    if (predict.length && pending(s).includes(botId)) return rng.pick(predict); // Raja bot always has a go
+    const rest = legal.filter((a) => a.type !== 'predict');
+    return rest.length ? rng.pick(rest) : null; // Mantri has no information: a fair coin flip.
   },
 
   isAction(a): a is RmcsAction {
     if (!isObj(a)) return false;
     if (a.type === 'ack') return true;
+    if (a.type === 'predict') return typeof a.correct === 'boolean';
     return a.type === 'guess' && isStr(a.target, 128);
   },
 };

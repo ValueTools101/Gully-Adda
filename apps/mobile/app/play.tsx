@@ -2,7 +2,8 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, Platform, View } from 'react-native';
 import { PassGate, playerName, useLogSounds } from '../src/components/game';
-import { Btn, Header, P, Screen } from '../src/components/ui';
+import { FloatingReactions, ReactionBar, useFloaters } from '../src/components/Reactions';
+import { Btn, Header, HelpButton, P, Screen } from '../src/components/ui';
 import { GameNavContext } from '../src/games/nav';
 import { getLocalSetup, type LocalSetup } from '../src/local/session';
 import { useLocalGame } from '../src/local/useLocalGame';
@@ -48,10 +49,12 @@ function LocalGame({ setup, onAgain }: { setup: LocalSetup; onAgain: () => void 
   };
 
   const Board = ui.Board;
+  const floaters = useFloaters();
   return (
     <GameNavContext.Provider value={nav}>
+      <View style={{ flex: 1 }}>
       <Screen dark={dark} testID={`play-${setup.game}`}>
-        <Header title={t(`game.${setup.game}.title`)} dark={dark} onBack={leave} />
+        <Header title={t(`game.${setup.game}.title`)} dark={dark} onBack={leave} right={<HelpButton game={setup.game} dark={dark} />} />
         {screen.kind === 'gate' ? (
           <PassGate name={playerName(state, screen.player)} onReveal={() => reveal(screen.player)} dark={dark} />
         ) : null}
@@ -65,7 +68,10 @@ function LocalGame({ setup, onAgain }: { setup: LocalSetup; onAgain: () => void 
         {screen.kind === 'board' ? (
           <Board view={screen.view} mode={setup.mode} shared={setup.mode === 'pass'} act={act} actGroup={actGroup} humans={humans} />
         ) : null}
+        {screen.kind !== 'gate' && !state.over ? <ReactionBar dark={dark} onReact={(e) => floaters.add(e, '')} /> : null}
       </Screen>
+      <FloatingReactions items={floaters.items} />
+      </View>
     </GameNavContext.Provider>
   );
 }

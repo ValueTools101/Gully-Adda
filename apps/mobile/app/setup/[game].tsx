@@ -2,7 +2,7 @@ import { getGame, isGameId, type BotDifficulty, type GameId, type PlayerInfo } f
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { View } from 'react-native';
-import { Btn, Card, Field, H2, Header, P, Screen, Segment, Stepper } from '../../src/components/ui';
+import { Btn, Bullets, Card, Field, H2, Header, P, Screen, Segment, Stepper } from '../../src/components/ui';
 import { GameArt } from '../../src/art/GameArt';
 import { GAME_UI } from '../../src/games';
 import { ConfigEditor, localConfig } from '../../src/games/ConfigEditor';
@@ -63,7 +63,7 @@ export default function Setup() {
           {GAME_UI[id].emoji} {t(`game.${id}.short`)}
         </P>
         <Btn small kind="ghost" label={`📖 ${t('home.howToPlay')}`} onPress={() => setShowRules((v) => !v)} />
-        {showRules ? <P style={{ color: id === 'mafia' ? colors.cream : colors.ink }}>{t(`rules.${id}`)}</P> : null}
+        {showRules ? <Bullets items={t(`rules.${id}`).split('\n')} dark={id === 'mafia'} /> : null}
       </Card>
 
       <H2>{t('setup.mode')}</H2>

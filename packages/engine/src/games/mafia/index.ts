@@ -16,6 +16,7 @@ export type MafiaRole = 'mafia' | 'doctor' | 'detective' | 'villager';
 export type MafiaPhase = 'roles' | 'night' | 'day' | 'vote';
 export type MafiaWinner = 'mafia' | 'village' | 'draw' | null;
 export const SKIP = '__skip__';
+export const GHOST_POINTS = 25;
 
 export interface MafiaConfig {
   mafiaCount: number;
@@ -61,6 +62,8 @@ export interface MafiaState extends BaseState {
   lastVote: { eliminated: PlayerId | null; tally: Record<PlayerId, number>; votes: Record<PlayerId, PlayerId> } | null;
   deaths: MafiaDeath[];
   winner: MafiaWinner;
+  /** Players who are out guess a Mafia member each day (scored at the end). */
+  ghostGuesses: Record<PlayerId, { day: number; target: PlayerId }[]>;
 }
 
 export type MafiaAction =
@@ -69,7 +72,8 @@ export type MafiaAction =
   | { type: 'save'; target: PlayerId }
   | { type: 'check'; target: PlayerId }
   | { type: 'ready' }
-  | { type: 'vote'; target: PlayerId };
+  | { type: 'vote'; target: PlayerId }
+  | { type: 'ghost'; target: PlayerId };
 
 export interface MafiaView extends BaseView {
   game: 'mafia';
@@ -98,6 +102,8 @@ export interface MafiaView extends BaseView {
   deaths: MafiaDeath[];
   winner: MafiaWinner;
   roleCounts: Record<MafiaRole, number>;
+  /** My own ghost guesses (only shown to me; everyone's at the end). */
+  ghostGuesses: Record<PlayerId, { day: number; target: PlayerId }[]>;
 }
 
 export function defaultMafiaCount(n: number): number {
@@ -286,6 +292,7 @@ export const mafia: GameDefinition<MafiaConfig, MafiaState, MafiaAction, MafiaVi
       lastVote: null,
       deaths: [],
       winner: null,
+      ghostGuesses: {},
     };
     s.rng = rng.state;
     s.deadline = deadlineIn(ctx, cfg.nightSeconds > 0 ? 20 : 0);
@@ -297,7 +304,14 @@ export const mafia: GameDefinition<MafiaConfig, MafiaState, MafiaAction, MafiaVi
   getPlayerView: (s, id) => view(s, hasPlayer(s, id) ? id : null),
 
   listLegalActions(s, id) {
-    if (s.over || !pending(s).includes(id)) return [];
+    if (s.over) return [];
+    if (!s.alive.includes(id) && hasPlayer(s, id)) {
+      // Out, but still playing: one ghost guess per day.
+      const used = (s.ghostGuesses[id] ?? []).some((g) => g.day === s.day);
+      if (used || (s.phase !== 'day' && s.phase !== 'vote')) return [];
+      return s.alive.map((target) => ({ type: 'ghost', target }) as MafiaAction);
+    }
+    if (!pending(s).includes(id)) return [];
     switch (s.phase) {
       case 'roles':
         return [{ type: 'ack' }];
@@ -317,6 +331,12 @@ export const mafia: GameDefinition<MafiaConfig, MafiaState, MafiaAction, MafiaVi
   applyAction(state, id, action, ctx) {
     if (state.over) return reject('game_over');
     if (!hasPlayer(state, id)) return reject('not_in_game');
+    if (action.type === 'ghost') {
+      if (!mafia.listLegalActions(state, id).some((a) => a.type === 'ghost' && 'target' in a && a.target === action.target)) return reject('cannot_ghost_guess');
+      const g = clone(state);
+      (g.ghostGuesses[id] ??= []).push({ day: g.day, target: action.target });
+      return accept(g);
+    }
     if (!pending(state).includes(id)) return reject('not_your_turn');
     const s = clone(state);
     const role = s.roles[id];
@@ -392,7 +412,8 @@ export const mafia: GameDefinition<MafiaConfig, MafiaState, MafiaAction, MafiaVi
     for (const p of s.players) {
       const team = s.roles[p.id] === 'mafia' ? 'mafia' : 'village';
       const won = s.winner === team;
-      out[p.id] = (won ? 100 : 0) + (s.alive.includes(p.id) ? 20 : 0);
+      const ghost = (s.ghostGuesses[p.id] ?? []).filter((g) => s.roles[g.target] === 'mafia').length * GHOST_POINTS;
+      out[p.id] = (won ? 100 : 0) + (s.alive.includes(p.id) ? 20 : 0) + ghost;
     }
     return out;
   },
@@ -435,7 +456,7 @@ export const mafia: GameDefinition<MafiaConfig, MafiaState, MafiaAction, MafiaVi
   isAction(a): a is MafiaAction {
     if (!isObj(a)) return false;
     if (a.type === 'ack' || a.type === 'ready') return true;
-    return ['kill', 'save', 'check', 'vote'].includes(String(a.type)) && isStr(a.target, 128);
+    return ['kill', 'save', 'check', 'vote', 'ghost'].includes(String(a.type)) && isStr(a.target, 128);
   },
 
   chatPolicy(s, id): ChatPolicy {
@@ -495,5 +516,6 @@ function view(s: MafiaState, me: PlayerId | null): MafiaView {
     deaths: clone(s.deaths),
     winner: s.winner,
     roleCounts: roleCounts(s),
+    ghostGuesses: s.over ? clone(s.ghostGuesses) : me && s.ghostGuesses[me] ? { [me]: clone(s.ghostGuesses[me]!) } : {},
   };
 }

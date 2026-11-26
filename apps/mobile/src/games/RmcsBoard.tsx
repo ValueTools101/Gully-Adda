@@ -2,7 +2,7 @@ import type { RmcsRole, RmcsView } from '@gully/engine';
 import { useEffect, useState } from 'react';
 import { Animated, Easing, StyleSheet, Text, View } from 'react-native';
 import { GameOverPanel, LogFeed, PlayerStrip, TurnBanner, playerName } from '../components/game';
-import { Btn, Card, Countdown, H2, P } from '../components/ui';
+import { Btn, Card, Countdown, H2, P, Row } from '../components/ui';
 import { t } from '../strings';
 import { colors, fonts, radius, retroShadow } from '../theme';
 import { useGameNav } from './nav';
@@ -34,6 +34,22 @@ export function Chit({ role, big }: { role: RmcsRole; big?: boolean }) {
 export function RmcsBoard({ view, act, actGroup, shared }: BoardProps<RmcsView>) {
   const legal = view.legal as { type: string; target?: string }[];
   const canAck = legal.some((a) => a.type === 'ack');
+  const canPredict = !shared && legal.some((a) => a.type === 'predict');
+  const rajaId = Object.entries(view.known).find(([, r]) => r === 'raja')?.[0];
+  const predictCard = canPredict ? (
+    <Card style={{ backgroundColor: '#FFF8E1' }}>
+      <H2>👑 {t('rmcs.predictTitle')}</H2>
+      <P>{t('rmcs.predictHint')}</P>
+      <Row>
+        <Btn small label={`👍 ${t('rmcs.predictYes')}`} onPress={() => act({ type: 'predict', correct: true } as never)} testID="rmcs-predict-yes" />
+        <Btn small kind="secondary" label={`👎 ${t('rmcs.predictNo')}`} onPress={() => act({ type: 'predict', correct: false } as never)} testID="rmcs-predict-no" />
+      </Row>
+    </Card>
+  ) : view.prediction !== null && view.phase !== 'result' ? (
+    <Card style={{ backgroundColor: '#FFF8E1' }}>
+      <P>👑 {view.prediction ? t('log.rmcs.predictYes', { name: playerName(view, rajaId) }) : t('log.rmcs.predictNo', { name: playerName(view, rajaId) })}</P>
+    </Card>
+  ) : null;
   const guesses = legal.filter((a) => a.type === 'guess');
   const mantri = Object.entries(view.known).find(([, r]) => r === 'mantri')?.[0];
   const last = view.history[view.history.length - 1];
@@ -68,6 +84,8 @@ export function RmcsBoard({ view, act, actGroup, shared }: BoardProps<RmcsView>)
           </View>
         </Card>
       )}
+
+      {predictCard}
 
       {view.phase === 'guess' && (
         <Card style={{ alignItems: 'center' }}>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { type MafiaView } from '@gully/engine';
+import { replay, type MafiaView } from '@gully/engine';
 import {
   GameError, applySettings, chatReaders, joinRoom, kickPlayer, leaveRoom, newRoom, processGame, startGame, submitAction, viewsFor,
   type PrivateDoc, type Room,
@@ -80,19 +80,17 @@ describe('online games', () => {
     }
   });
 
-  it('hide & seek: nobody sees where others hid, and the seeker sees no one', () => {
-    let { room, priv } = startGame(lobby('hideseek', 4), 'u0', 11, T);
-    let st = JSON.parse(priv.json);
-    const seeker = st.players[st.seekerIndex % 4].id as string;
-    for (const id of ['u0', 'u1', 'u2', 'u3'].filter((x) => x !== seeker)) {
-      ({ room, priv } = submitAction(room, priv, id, { type: 'hide', spot: 'well' }, 1, T));
-    }
-    st = JSON.parse(priv.json);
-    expect(st.phase).toBe('seek');
-    const views = viewsFor(room, st);
-    expect(JSON.parse(views[seeker]!).mySpot).toBeNull();
-    expect(JSON.parse(views[seeker]!).knownSpots).toEqual({});
-    for (const [uid, json] of Object.entries(views)) if (uid !== seeker) expect(JSON.parse(json).knownSpots).toEqual({});
+  it('hide & seek: the server replays inputs to score them; others\u2019 scores stay hidden until the round ends', () => {
+    let { room, priv } = startGame(lobby('hideseek', 3), 'u0', 11, T);
+    const st = JSON.parse(priv.json);
+    const round = st.rounds[0];
+    const honest = replay(round.seed, round.role, st.config.roundSeconds, st.config.aiLevel, '')!;
+    ({ room, priv } = submitAction(room, priv, 'u0', { type: 'submit', inputs: '' }, 1, T));
+    expect(JSON.parse(priv.json).results[0].u0).toEqual(honest);
+    expect(() => submitAction(structuredClone(room), structuredClone(priv), 'u1', { type: 'submit', inputs: '~~~' }, 1, T)).toThrow();
+    const views = viewsFor(room, JSON.parse(priv.json));
+    expect(JSON.parse(views.u1!).results).toEqual([]);
+    expect(JSON.parse(views.u1!).myResult).toBeNull();
   });
 
   it('rejects out-of-turn, malformed, duplicate and replayed actions', () => {
