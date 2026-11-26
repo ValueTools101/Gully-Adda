@@ -1,0 +1,23 @@
+{
+  "name": "@gully/engine",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Pure TypeScript game rules shared by the app (bots, pass-and-play) and Cloud Functions (online). No React, no Firebase.",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "sideEffects": false,
+  "scripts": {
+    "typecheck": "tsc --noEmit -p .",
+    "lint": "eslint src test",
+    "test": "vitest run --exclude \"test/sim/**\"",
+    "test:sim": "vitest run test/sim"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.74.0",
+    "vitest": "^4.0.0"
+  },
+  "packageManager": "npm@11.6.2"
+}

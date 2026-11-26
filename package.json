@@ -1,0 +1,22 @@
+{
+  "name": "gully-adda",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Gully Adda: 90s Retro Games - monorepo (Expo app, shared engine, Firebase backend)",
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "functions"
+  ],
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test -w @gully/engine",
+    "test:sim": "npm run test:sim -w @gully/engine",
+    "test:emulator": "firebase emulators:exec --only firestore,functions,auth --project demo-gully-adda \"npm run test:emulator -w functions\"",
+    "check": "npm run typecheck && npm run lint && npm test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
